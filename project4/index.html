@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>MIS評分表</title>
+</head>
+<body>
+  <h2>MIS評分表</h2>
+  <p><!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>MIS 中文版 App</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; vertical-align: middle; }
+    th { background-color: #f2f2f2; }
+    .normal { background-color: #c8e6c9; }
+    .moderate { background-color: #fff9c4; }
+    .severe { background-color: #ffcdd2; }
+    .controls { margin: 10px 0; }
+    button { margin-right: 10px; padding: 5px 10px; }
+    select, input { width: 100%; }
+  </style>
+</head>
+<body>
+  <h1>Comprehensive Malnutrition-Inflammation Score (MIS) 中文版</h1>
+  <div class="controls">
+    <button onclick="addRow()">新增病人</button>
+    <button onclick="exportCSV()">匯出 CSV</button>
+    <button onclick="exportExcel()">匯出 Excel</button>
+    <button onclick="clearData()">清空資料</button>
+  </div>
+  <table id="misTable">
+    <thead>
+      <tr>
+        <th>病人ID</th>
+        <th>姓名</th>
+        <th>年齡</th>
+        <th>性別</th>
+        <th>1. 體重變化</th>
+        <th>2. 飲食攝取量</th>
+        <th>3. 胃腸道症狀</th>
+        <th>4. 功能能力</th>
+        <th>5. 併發症/發炎+透析年資</th>
+        <th>6. BMI</th>
+        <th>7. 體脂肪量</th>
+        <th>8. 肌肉量</th>
+        <th>9. 白蛋白</th>
+        <th>10. TIBC</th>
+        <th>總分</th>
+        <th>解讀</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <h2>統計總結</h2>
+  <canvas id="chart" width="400" height="200"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const misTable = document.getElementById('misTable').getElementsByTagName('tbody')[0];
+    const STORAGE_KEY = "MIS_DATA";
+
+    const questions = [
+      ["0=無下降","1=5—10% 體重下降","2=10—15% 體重下降","3=>15% 體重下降"],
+      ["0=正常","1=輕度減少","2=中度減少","3=幾乎沒有"],
+      ["0=無","1=輕度(偶爾噁心/厭食)","2=中度(常嘔吐/腹瀉)","3=嚴重(持續嘔吐/厭食)"],
+      ["0=正常","1=輕度下降","2=中度下降","3=臥床失能"],
+      ["0=無發炎且透析<1年","1=輕度發炎或透析1-4年","2=中度發炎或透析5-10年","3=嚴重發炎或透析>10年"],
+      ["0=≥20","1=18—19.9","2=16—17.9","3=<16"],
+      ["0=正常","1=輕度減少","2=中度減少","3=嚴重減少"],
+      ["0=正常","1=輕度減少","2=中度減少","3=嚴重減少"],
+      ["0=Alb≥4","1=Alb3.5—3.9","2=Alb3.0—3.4","3=Alb<3.0"],
+      ["0=TIBC>250mg/dl","1=TIBC 200~249mg/dl","2=TIBC 150~199mg/dl","3=TIBC<150mg/dl"]
+    ];
+
+    function addRow(patient = null) {
+      const row = misTable.insertRow();
+      // 基本資料欄
+      const idCell = row.insertCell();
+      const idInput = document.createElement('input'); idInput.value = patient ? patient.id : ""; idCell.appendChild(idInput);
+      const nameCell = row.insertCell();
+      const nameInput = document.createElement('input'); nameInput.value = patient ? patient.name : ""; nameCell.appendChild(nameInput);
+      const ageCell = row.insertCell();
+      const ageInput = document.createElement('input'); ageInput.type="number"; ageInput.value = patient ? patient.age : ""; ageCell.appendChild(ageInput);
+      const genderCell = row.insertCell();
+      const genderSelect = document.createElement('select');
+      ["","男","女"].forEach(g => { let opt=document.createElement('option'); opt.value=g; opt.textContent=g; genderSelect.appendChild(opt); });
+      genderSelect.value = patient ? patient.gender : ""; genderCell.appendChild(genderSelect);
+
+      // MIS 題目
+      for (let i=0; i<10; i++) {
+        const cell = row.insertCell();
+        const select = document.createElement('select');
+        questions[i].forEach((desc,score)=>{
+          let opt=document.createElement('option');
+          opt.value=score; opt.textContent=desc;
+          select.appendChild(opt);
+        });
+        select.value = patient ? patient.mis[i] : 0;
+        select.onchange=()=>updateRow(row);
+        cell.appendChild(select);
+      }
+
+      const totalCell=row.insertCell();
+      const interpCell=row.insertCell();
+      updateRow(row);
+    }
+
+    function updateRow(row) {
+      const selects = row.querySelectorAll('select');
+      const misScores = Array.from(selects).slice(1).map(s => parseInt(s.value));
+      const total = misScores.reduce((a,b)=>a+b,0);
+      row.cells[row.cells.length-2].textContent = total;
+      let interp = "";
+      row.className = "";
+      if (total <= 7) { interp="正常"; row.className="normal"; }
+      else if (total <= 18) { interp="輕中度"; row.className="moderate"; }
+      else { interp="嚴重"; row.className="severe"; }
+      row.cells[row.cells.length-1].textContent = interp;
+      saveData();
+      updateChart();
+    }
+
+    function saveData() {
+      const data = [];
+      Array.from(misTable.rows).forEach(row => {
+        const inputs = row.querySelectorAll('input,select');
+        const patient = {
+          id: inputs[0].value,
+          name: inputs[1].value,
+          age: inputs[2].value,
+          gender: inputs[3].value,
+          mis: Array.from(inputs).slice(4,14).map(s => s.value),
+          total: row.cells[row.cells.length-2].textContent,
+          interp: row.cells[row.cells.length-1].textContent
+        };
+        data.push(patient);
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function loadData() {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      data.forEach(p => addRow(p));
+    }
+
+    function clearData() {
+      misTable.innerHTML = "";
+      localStorage.removeItem(STORAGE_KEY);
+      updateChart();
+    }
+
+    function exportCSV() {
+      let csv = "病人ID,姓名,年齡,性別," + Array.from({length:10},(_,i)=>"Q"+(i+1)).join(",") + ",總分,解讀\n";
+      Array.from(misTable.rows).forEach(row => {
+        const vals = [];
+        row.querySelectorAll('input,select').forEach(el => vals.push(el.value));
+        vals.push(row.cells[row.cells.length-2].textContent);
+        vals.push(row.cells[row.cells.length-1].textContent);
+        csv += vals.join(",") + "\n";
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = "MIS_data.csv";
+      a.click();
+    }
+
+    function exportExcel() {
+      const wb = XLSX.utils.book_new();
+      const data = [];
+      const header = ["病人ID","姓名","年齡","性別"];
+      for (let i=1;i<=10;i++) header.push("Q"+i);
+      header.push("總分","解讀");
+      data.push(header);
+      Array.from(misTable.rows).forEach(row => {
+        const vals = [];
+        row.querySelectorAll('input,select').forEach(el => vals.push(el.value));
+        vals.push(row.cells[row.cells.length-2].textContent);
+        vals.push(row.cells[row.cells.length-1].textContent);
+        data.push(vals);
+      });
+      const ws = XLSX.utils.aoa_to_sheet(data);
+      XLSX.utils.book_append_sheet(wb, ws, "MIS Data");
+      XLSX.writeFile(wb, "MIS_data.xlsx");
+    }
+
+    let chart;
+    function updateChart() {
+      const counts = {正常:0, 輕中度:0, 嚴重:0};
+      Array.from(misTable.rows).forEach(row => {
+        const interp = row.cells[row.cells.length-1].textContent;
+        if (counts[interp] !== undefined) counts[interp]++;
+      });
+      const ctx = document.getElementById('chart').getContext('2d');
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: ["正常","輕中度","嚴重"],
+          datasets: [{
+            data: [counts.正常, counts.輕中度, counts.嚴重],
+            backgroundColor: ["#81c784","#fff176","#e57373"]
+          }]
+        }
+      });
+    }
+
+    window.onload = loadData;
+  </script>
+</body>
+</html></p>
+</body>
+</html>

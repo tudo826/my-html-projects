@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>ADIME營養紀錄_</title>
+</head>
+<body>
+  <h2>ADIME營養紀錄_</h2>
+  <p><!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADIME營養診斷紀錄系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95em;
+        }
+        
+        .patient-info {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-item label {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .info-item input {
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 0.95em;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 1em;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s;
+            white-space: nowrap;
+            position: relative;
+        }
+        
+        .tab:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .tab.active {
+            color: #667eea;
+            background: white;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #667eea;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 0.95em;
+            font-family: inherit;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .subsection {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .subsection h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 5px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .pes-format {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        
+        .pes-format strong {
+            color: #667eea;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                font-size: 9pt;
+            }
+            
+            .container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+            
+            .header {
+                padding: 6px 12px;
+                page-break-after: avoid;
+            }
+            
+            .header h1 {
+                font-size: 14pt;
+                margin-bottom: 2px;
+            }
+            
+            .header p {
+                font-size: 8pt;
+            }
+            
+            .patient-info {
+                padding: 5px 12px;
+                page-break-after: avoid;
+            }
+            
+            .info-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 4px;
+                font-size: 8.5pt;
+            }
+            
+            .info-item label {
+                font-size: 8.5pt;
+                margin-bottom: 1px;
+            }
+            
+            .info-item input,
+            .info-item select {
+                padding: 1px 3px;
+                font-size: 8.5pt;
+                border: none;
+                border-bottom: 1px solid #666;
+            }
+            
+            .tabs, .buttons {
+                display: none;
+            }
+            
+            .content {
+                padding: 6px 12px;
+            }
+            
+            .section {
+                display: block !important;
+                page-break-inside: avoid;
+            }
+            
+            .section h2 {
+                font-size: 10pt;
+                margin-top: 5px;
+                margin-bottom: 3px;
+                color: #333;
+                background: #f0f0f0;
+                padding: 2px 6px;
+            }
+            
+            .subsection {
+                padding: 3px;
+                margin-bottom: 4px;
+                background: transparent;
+                page-break-inside: avoid;
+            }
+            
+            .subsection h3 {
+                font-size: 8.5pt;
+                margin-bottom: 2px;
+                color: #555;
+                font-weight: 600;
+            }
+            
+            .form-group {
+                margin-bottom: 3px;
+            }
+            
+            .form-group label {
+                font-size: 8pt;
+                margin-bottom: 1px;
+                font-weight: 600;
+                display: inline-block;
+                min-width: 70px;
+            }
+            
+            .form-group input,
+            .form-group textarea,
+            .form-group select {
+                padding: 1px 3px;
+                font-size: 8pt;
+                border: none;
+                border-bottom: 1px solid #999;
+                background: transparent;
+                display: inline-block;
+                width: calc(100% - 75px);
+                vertical-align: top;
+            }
+            
+            .form-group textarea {
+                min-height: 18px;
+                max-height: 28px;
+                line-height: 1.3;
+                overflow: hidden;
+            }
+            
+            .form-row {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 4px;
+                margin-bottom: 2px;
+            }
+            
+            .form-row .form-group label {
+                display: block;
+                min-width: auto;
+                font-size: 7.5pt;
+            }
+            
+            .form-row .form-group input,
+            .form-row .form-group textarea {
+                display: block;
+                width: 100%;
+                font-size: 7.5pt;
+            }
+            
+            .checkbox-group {
+                gap: 5px;
+                font-size: 7.5pt;
+                display: inline-block;
+            }
+            
+            .checkbox-item {
+                display: inline-block;
+                margin-right: 6px;
+            }
+            
+            .pes-format {
+                padding: 3px 5px;
+                margin-top: 2px;
+                font-size: 8pt;
+                background: #f5f5f5;
+            }
+            
+            /* 第一頁內容 - Assessment */
+            #section0 {
+                page-break-after: always;
+            }
+            
+            #section0 .subsection {
+                margin-bottom: 3px;
+            }
+            
+            /* 第二頁內容 - D.I.M.E */
+            #section1, #section2, #section3, #section4 {
+                page-break-after: avoid;
+                margin-bottom: 4px;
+            }
+            
+            #section1 h2, #section2 h2, #section3 h2, #section4 h2 {
+                margin-top: 3px;
+            }
+            
+            /* 壓縮第二頁 */
+            #section1 .subsection,
+            #section2 .subsection,
+            #section3 .subsection,
+            #section4 .subsection {
+                margin-bottom: 2px;
+                padding: 2px;
+            }
+            
+            #section2 .form-row,
+            #section3 .form-row,
+            #section4 .form-row {
+                margin-bottom: 1px;
+            }
+            
+            /* 隱藏次要診斷來節省空間 */
+            #section1 .subsection:last-child {
+                display: none;
+            }
+            
+            /* 簡化某些區塊標題 */
+            #section2 .subsection:nth-child(2) h3,
+            #section2 .subsection:nth-child(3) h3,
+            #section2 .subsection:nth-child(4) h3 {
+                font-size: 8pt;
+            }
+            
+            /* 簡化顯示 */
+            .info-item input:read-only {
+                border: none;
+                font-weight: 600;
+            }
+            
+            @page {
+                size: A4;
+                margin: 10mm 12mm;
+            }
+        }
+    </style>
+<style>
+@media print {
+
+    /* A+D 第 1 頁，IME 第 2 頁 */
+    #section0,
+    #section1 {
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* 在 D 區後強制換頁，讓 IME 都到第 2 頁 */
+    #section1 {
+        page-break-after: always !important;
+    }
+
+    /* 第二頁：IM E */
+    #section2, #section3, #section4 {
+        page-break-before: auto !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* 更好讀的字體 */
+    body { 
+        font-size: 11pt !important; 
+        line-height: 1.12 !important;
+    }
+
+    /* 控制整體不要超過兩頁 */
+    @page { 
+        size: A4;
+        margin: 8mm 10mm;
+    }
+
+    /* 適度壓縮，但不犧牲字體 */
+    * {
+        margin: 0 !important;
+        padding: 1px 0 !important;
+        line-height: 1.12 !important;
+    }
+
+    input, select {
+        height: 16px !important;
+        font-size: 10.5pt !important;
+        border: none !important;
+        border-bottom: 1px solid #999 !important;
+    }
+
+    textarea {
+        min-height: 18px !important;
+        max-height: 26px !important;
+        line-height: 1.12 !important;
+        overflow: hidden !important;
+    }
+}
+</style>
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 ADIME營養診斷紀錄系統</h1>
+            <p>Assessment 評估 | Diagnosis 診斷 | Intervention 介入 | Monitoring 監測 | Evaluation 評價</p>
+        </div>
+        
+        <div class="patient-info">
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>病歷號</label>
+                    <input type="text" id="patientId" placeholder="請輸入病歷號">
+                </div>
+                <div class="info-item">
+                    <label>姓名</label>
+                    <input type="text" id="patientName" placeholder="請輸入姓名">
+                </div>
+                <div class="info-item">
+                    <label>性別</label>
+                    <select id="gender">
+                        <option value="">請選擇</option>
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </div>
+                <div class="info-item">
+                    <label>年齡</label>
+                    <input type="number" id="age" placeholder="請輸入年齡">
+                </div>
+                <div class="info-item">
+                    <label>紀錄日期</label>
+                    <input type="date" id="recordDate">
+                </div>
+                <div class="info-item">
+                    <label>營養師</label>
+                    <input type="text" id="dietitian" placeholder="請輸入營養師姓名">
+                </div>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab(0)">A - Assessment 評估</button>
+            <button class="tab" onclick="switchTab(1)">D - Diagnosis 診斷</button>
+            <button class="tab" onclick="switchTab(2)">I - Intervention 介入</button>
+            <button class="tab" onclick="switchTab(3)">M - Monitoring 監測</button>
+            <button class="tab" onclick="switchTab(4)">E - Evaluation 評價</button>
+        </div>
+        
+        <div class="content">
+            <!-- Assessment Section -->
+            <div class="section active" id="section0">
+                <h2>A - Assessment 評估</h2>
+                
+                <div class="subsection">
+                    <h3>人體測量 (Anthropometric)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>身高 (cm)</label>
+                            <input type="number" step="0.1" id="height">
+                        </div>
+                        <div class="form-group">
+                            <label>體重 (kg)</label>
+                            <input type="number" step="0.1" id="weight">
+                        </div>
+                        <div class="form-group">
+                            <label>BMI</label>
+                            <input type="text" id="bmi" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>理想體重 (kg)</label>
+                            <input type="number" step="0.1" id="idealWeight">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>體重變化</label>
+                            <textarea id="weightChange" placeholder="近期體重變化情況"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>生化檢驗 (Biochemical)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>白蛋白 (g/dL)</label>
+                            <input type="number" step="0.1" id="albumin">
+                        </div>
+                        <div class="form-group">
+                            <label>血糖 (mg/dL)</label>
+                            <input type="number" id="glucose">
+                        </div>
+                        <div class="form-group">
+                            <label>HbA1c (%)</label>
+                            <input type="number" step="0.1" id="hba1c">
+                        </div>
+                        <div class="form-group">
+                            <label>血脂</label>
+                            <input type="text" id="lipid" placeholder="TC/TG/HDL/LDL">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>其他檢驗數據</label>
+                        <textarea id="otherLab" placeholder="其他相關生化檢驗數據"></textarea>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>臨床資料 (Clinical)</h3>
+                    <div class="form-group">
+                        <label>主要診斷</label>
+                        <textarea id="diagnosis" placeholder="主要診斷及相關疾病"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>用藥情況</label>
+                        <textarea id="medication" placeholder="目前使用的藥物及可能影響營養的藥物"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>臨床症狀</label>
+                        <textarea id="symptoms" placeholder="腸胃症狀、食慾、排便等"></textarea>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>飲食史 (Dietary)</h3>
+                    <div class="form-group">
+                        <label>飲食攝取</label>
+                        <textarea id="dietIntake" placeholder="24小時飲食回憶或飲食頻率"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>熱量攝取 (kcal/day)</label>
+                            <input type="number" id="energyIntake">
+                        </div>
+                        <div class="form-group">
+                            <label>蛋白質攝取 (g/day)</label>
+                            <input type="number" id="proteinIntake">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>飲食習慣</label>
+                        <textarea id="dietHabit" placeholder="飲食偏好、禁忌、特殊飲食習慣"></textarea>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>個人史 (Personal/Social)</h3>
+                    <div class="form-group">
+                        <label>生活型態</label>
+                        <textarea id="lifestyle" placeholder="活動量、職業、作息等"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>社會經濟狀況</label>
+                        <textarea id="socialEconomic" placeholder="經濟狀況、照顧者、取得食物能力等"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Diagnosis Section -->
+            <div class="section" id="section1">
+                <h2>D - Diagnosis 營養診斷</h2>
+                
+                <div class="subsection">
+                    <h3>PES Statement (Problem-Etiology-Signs/Symptoms)</h3>
+                    
+                    <div class="form-group">
+                        <label>P - Problem (問題)</label>
+                        <select id="problem">
+                            <option value="">請選擇營養問題</option>
+                            <optgroup label="攝取類 (NI)">
+                                <option value="NI-1.1">口腔攝取不足</option>
+                                <option value="NI-1.2">能量攝取不足</option>
+                                <option value="NI-1.4">能量攝取過多</option>
+                                <option value="NI-5.1">蛋白質攝取不足</option>
+                                <option value="NI-5.3">蛋白質攝取過多</option>
+                                <option value="NI-5.7.1">維生素不足</option>
+                                <option value="NI-5.10.1">礦物質不足</option>
+                            </optgroup>
+                            <optgroup label="臨床類 (NC)">
+                                <option value="NC-2.1">營養不良</option>
+                                <option value="NC-2.2">體重過輕</option>
+                                <option value="NC-3.3">體重過重/肥胖</option>
+                                <option value="NC-3.4">體重變化異常</option>
+                            </optgroup>
+                            <optgroup label="行為環境類 (NB)">
+                                <option value="NB-1.1">營養知識不足</option>
+                                <option value="NB-1.2">有害的飲食選擇</option>
+                                <option value="NB-1.4">身體活動不足</option>
+                                <option value="NB-1.5">身體活動過度</option>
+                                <option value="NB-2.1">無法自我餵食</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>自訂問題描述</label>
+                        <input type="text" id="problemCustom" placeholder="若上方選項不適用,請自訂問題描述">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>E - Etiology (病因)</label>
+                        <textarea id="etiology" placeholder="related to... (例如:食慾不振、疾病影響、知識不足等)"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>S - Signs/Symptoms (徵象/症狀)</label>
+                        <textarea id="signs" placeholder="as evidenced by... (例如:體重下降10%、BMI 17、白蛋白2.5 g/dL等具體數據)"></textarea>
+                    </div>
+                    
+                    <div class="pes-format">
+                        <strong>PES陳述預覽:</strong>
+                        <p id="pesPreview">請填寫上方欄位以生成PES陳述</p>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>其他營養診斷</h3>
+                    <div class="form-group">
+                        <label>次要診斷1</label>
+                        <textarea id="diagnosis2" placeholder="若有其他營養診斷,請以PES格式描述"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>次要診斷2</label>
+                        <textarea id="diagnosis3" placeholder="若有其他營養診斷,請以PES格式描述"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Intervention Section -->
+            <div class="section" id="section2">
+                <h2>I - Intervention 營養介入</h2>
+                
+                <div class="subsection">
+                    <h3>營養處方 (Nutrition Prescription)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>目標熱量 (kcal/day)</label>
+                            <input type="number" id="targetEnergy">
+                        </div>
+                        <div class="form-group">
+                            <label>目標蛋白質 (g/day)</label>
+                            <input type="number" id="targetProtein">
+                        </div>
+                        <div class="form-group">
+                            <label>目標體重 (kg)</label>
+                            <input type="number" step="0.1" id="targetWeight">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>飲食型態</label>
+                        <input type="text" id="dietType" placeholder="例如:糖尿病飲食、低鈉飲食、高蛋白飲食等">
+                    </div>
+                    <div class="form-group">
+                        <label>其他營養素目標</label>
+                        <textarea id="otherNutrients" placeholder="例如:限制鈉<2000mg/day、增加纖維攝取等"></textarea>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>營養教育 (Nutrition Education)</h3>
+                    <div class="form-group">
+                        <label>教育主題</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="edu1" value="疾病飲食原則">
+                                <label for="edu1">疾病飲食原則</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="edu2" value="份量控制">
+                                <label for="edu2">份量控制</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="edu3" value="食物選擇">
+                                <label for="edu3">食物選擇</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="edu4" value="營養補充品">
+                                <label for="edu4">營養補充品</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="edu5" value="外食技巧">
+                                <label for="edu5">外食技巧</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>教育內容</label>
+                        <textarea id="educationContent" placeholder="詳細教育內容及提供的衛教資料"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>個案理解程度</label>
+                        <select id="understanding">
+                            <option value="">請選擇</option>
+                            <option value="完全理解">完全理解</option>
+                            <option value="部分理解">部分理解</option>
+                            <option value="需加強">需加強</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>營養諮詢 (Nutrition Counseling)</h3>
+                    <div class="form-group">
+                        <label>行為改變目標</label>
+                        <textarea id="behaviorGoal" placeholder="例如:每日紀錄飲食、減少含糖飲料攝取等"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>諮詢策略</label>
+                        <textarea id="counselingStrategy" placeholder="使用的諮詢技巧、動機式晤談等"></textarea>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>營養照護協調 (Coordination of Nutrition Care)</h3>
+                    <div class="form-group">
+                        <label>轉介或協調</label>
+                        <textarea id="coordination" placeholder="與醫師、護理師、其他專業人員的協調事項"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>營養補充品處方</label>
+                        <textarea id="supplements" placeholder="建議的營養補充品種類及劑量"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Monitoring Section -->
+            <div class="section" id="section3">
+                <h2>M - Monitoring 營養監測</h2>
+                
+                <div class="subsection">
+                    <h3>監測指標</h3>
+                    <div class="form-group">
+                        <label>人體測量監測</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="mon1" value="體重" checked>
+                                <label for="mon1">體重</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="mon2" value="BMI">
+                                <label for="mon2">BMI</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="mon3" value="身體組成">
+                                <label for="mon3">身體組成</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>生化監測</label>
+                        <textarea id="monLab" placeholder="需追蹤的生化指標(例如:白蛋白、血糖、HbA1c等)"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>飲食攝取監測</label>
+                        <textarea id="monDiet" placeholder="監測熱量、蛋白質攝取或其他營養素"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>臨床症狀監測</label>
+                        <textarea id="monSymptoms" placeholder="需監測的症狀(例如:食慾、腸胃症狀等)"></textarea>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>監測頻率與方式</h3>
+                    <div class="form-group">
+                        <label>追蹤頻率</label>
+                        <select id="followUpFreq">
+                            <option value="">請選擇</option>
+                            <option value="每日">每日</option>
+                            <option value="每週">每週</option>
+                            <option value="每兩週">每兩週</option>
+                            <option value="每月">每月</option>
+                            <option value="每三個月">每三個月</option>
+                            <option value="視情況">視情況</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>追蹤方式</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="follow1" value="門診追蹤">
+                                <label for="follow1">門診追蹤</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="follow2" value="電話追蹤">
+                                <label for="follow2">電話追蹤</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="follow3" value="飲食日記">
+                                <label for="follow3">飲食日記</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="follow4" value="照會追蹤">
+                                <label for="follow4">照會追蹤</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>監測計畫</label>
+                        <textarea id="monitoringPlan" placeholder="詳細的監測計畫及時間表"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Evaluation Section -->
+            <div class="section" id="section4">
+                <h2>E - Evaluation 成效評價</h2>
+                
+                <div class="subsection">
+                    <h3>介入成效評估</h3>
+                    <div class="form-group">
+                        <label>目標達成情況</label>
+                        <select id="goalAchievement">
+                            <option value="">請選擇</option>
+                            <option value="目標達成">目標達成</option>
+                            <option value="部分達成">部分達成</option>
+                            <option value="未達成">未達成</option>
+                            <option value="持續追蹤中">持續追蹤中</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>人體測量變化</label>
+                        <textarea id="evalAnthro" placeholder="體重、BMI等變化情況"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>生化數值變化</label>
+                        <textarea id="evalLab" placeholder="生化指標的改善或變化情況"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>飲食攝取改善</label>
+                        <textarea id="evalDiet" placeholder="飲食攝取量及品質的改變"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>行為改變</label>
+                        <textarea id="evalBehavior" placeholder="個案飲食行為、知識、態度的改變"></textarea>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>後續計畫</h3>
+                    <div class="form-group">
+                        <label>營養診斷調整</label>
+                        <select id="diagnosisUpdate">
+                            <option value="">請選擇</option>
+                            <option value="問題已解決">問題已解決</option>
+                            <option value="問題改善中">問題改善中</option>
+                            <option value="問題持續">問題持續</option>
+                            <option value="新增其他問題">新增其他問題</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>介入策略調整</label>
+                        <textarea id="interventionUpdate" placeholder="根據成效評估,需調整的介入策略"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>下次追蹤重點</label>
+                        <textarea id="nextFocus" placeholder="下次追蹤需特別注意的項目"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>結案或轉介</label>
+                        <select id="discharge">
+                            <option value="">請選擇</option>
+                            <option value="繼續追蹤">繼續追蹤</option>
+                            <option value="結案">結案</option>
+                            <option value="轉介其他單位">轉介其他單位</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>整體評論</h3>
+                    <div class="form-group">
+                        <label>營養師綜合評論</label>
+                        <textarea id="overallComment" placeholder="整體營養照護成效評論及建議"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="clearForm()">清除表單</button>
+                <button class="btn btn-success" onclick="exportToWord()">匯出Word</button>
+                <button class="btn btn-primary" onclick="printRecord()">列印紀錄</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Tab switching
+        function switchTab(index) {
+            const tabs = document.querySelectorAll('.tab');
+            const sections = document.querySelectorAll('.section');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            sections.forEach(section => section.classList.remove('active'));
+            
+            tabs[index].classList.add('active');
+            sections[index].classList.add('active');
+        }
+        
+        // Calculate BMI
+        document.getElementById('height').addEventListener('input', calculateBMI);
+        document.getElementById('weight').addEventListener('input', calculateBMI);
+        
+        function calculateBMI() {
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            
+            if (height && weight && height > 0) {
+                const heightM = height / 100;
+                const bmi = (weight / (heightM * heightM)).toFixed(1);
+                document.getElementById('bmi').value = bmi;
+            }
+        }
+        
+        // Update PES statement preview
+        document.getElementById('problem').addEventListener('change', updatePES);
+        document.getElementById('problemCustom').addEventListener('input', updatePES);
+        document.getElementById('etiology').addEventListener('input', updatePES);
+        document.getElementById('signs').addEventListener('input', updatePES);
+        
+        function updatePES() {
+            const problem = document.getElementById('problem').value || document.getElementById('problemCustom').value;
+            const etiology = document.getElementById('etiology').value;
+            const signs = document.getElementById('signs').value;
+            
+            let pesText = '';
+            if (problem) {
+                pesText = problem;
+                if (etiology) {
+                    pesText += ' related to ' + etiology;
+                }
+                if (signs) {
+                    pesText += ' as evidenced by ' + signs;
+                }
+            } else {
+                pesText = '請填寫上方欄位以生成PES陳述';
+            }
+            
+            document.getElementById('pesPreview').textContent = pesText;
+        }
+        
+        // Set default date
+        document.getElementById('recordDate').valueAsDate = new Date();
+        
+        // Clear form
+        function clearForm() {
+            if (confirm('確定要清除所有表單資料嗎?')) {
+                document.querySelectorAll('input[type="text"], input[type="number"], input[type="date"], textarea, select').forEach(field => {
+                    if (field.type === 'date') {
+                        field.valueAsDate = new Date();
+                    } else {
+                        field.value = '';
+                    }
+                });
+                document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                updatePES();
+            }
+        }
+        
+        // Print record
+        function printRecord() {
+            window.print();
+        }
+        
+        // Export to Word (HTML format)
+        function exportToWord() {
+            const patientName = document.getElementById('patientName').value || '未填寫';
+            const recordDate = document.getElementById('recordDate').value || '';
+            
+            let html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>ADIME營養紀錄_${patientName}_${recordDate}</title>
+                    <style>
+                        body { font-family: 'Microsoft JhengHei', Arial, sans-serif; margin: 40px; }
+                        h1 { color: #667eea; text-align: center; }
+                        h2 { color: #667eea; border-bottom: 2px solid #667eea; padding-bottom: 5px; margin-top: 30px; }
+                        h3 { color: #764ba2; margin-top: 20px; }
+                        .patient-info { background: #f8f9fa; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+                        .info-row { margin: 5px 0; }
+                        .label { font-weight: bold; color: #495057; }
+                        .value { margin-left: 10px; }
+                        .section { margin-bottom: 30px; page-break-inside: avoid; }
+                        .subsection { margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 5px; }
+                        .pes-box { background: #e7f3ff; border-left: 4px solid #667eea; padding: 15px; margin: 10px 0; }
+                        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+                        td { padding: 8px; border: 1px solid #dee2e6; }
+                    </style>
+                </head>
+                <body>
+                    <h1>🏥 ADIME營養診斷紀錄</h1>
+            `;
+            
+            // Patient Info
+            html += '<div class="patient-info">';
+            html += `<div class="info-row"><span class="label">病歷號:</span><span class="value">${document.getElementById('patientId').value || '未填寫'}</span></div>`;
+            html += `<div class="info-row"><span class="label">姓名:</span><span class="value">${document.getElementById('patientName').value || '未填寫'}</span></div>`;
+            html += `<div class="info-row"><span class="label">性別:</span><span class="value">${document.getElementById('gender').value || '未填寫'}</span></div>`;
+            html += `<div class="info-row"><span class="label">年齡:</span><span class="value">${document.getElementById('age').value || '未填寫'}</span></div>`;
+            html += `<div class="info-row"><span class="label">紀錄日期:</span><span class="value">${document.getElementById('recordDate').value || '未填寫'}</span></div>`;
+            html += `<div class="info-row"><span class="label">營養師:</span><span class="value">${document.getElementById('dietitian').value || '未填寫'}</span></div>`;
+            html += '</div>';
+            
+            // Assessment
+            html += '<div class="section">';
+            html += '<h2>A - Assessment 營養評估</h2>';
+            html += '<div class="subsection">';
+            html += '<h3>人體測量</h3>';
+            html += `<p>身高: ${document.getElementById('height').value || '未填寫'} cm | 體重: ${document.getElementById('weight').value || '未填寫'} kg | BMI: ${document.getElementById('bmi').value || '未填寫'} | 理想體重: ${document.getElementById('idealWeight').value || '未填寫'} kg</p>`;
+            html += `<p><strong>體重變化:</strong> ${document.getElementById('weightChange').value || '未填寫'}</p>`;
+            html += '</div>';
+            
+            html += '<div class="subsection">';
+            html += '<h3>生化檢驗</h3>';
+            html += `<p>白蛋白: ${document.getElementById('albumin').value || '未填寫'} g/dL | 血糖: ${document.getElementById('glucose').value || '未填寫'} mg/dL | HbA1c: ${document.getElementById('hba1c').value || '未填寫'} % | 血脂: ${document.getElementById('lipid').value || '未填寫'}</p>`;
+            html += `<p><strong>其他檢驗:</strong> ${document.getElementById('otherLab').value || '未填寫'}</p>`;
+            html += '</div>';
+            
+            html += '<div class="subsection">';
+            html += '<h3>臨床資料</h3>';
+            html += `<p><strong>主要診斷:</strong> ${document.getElementById('diagnosis').value || '未填寫'}</p>`;
+            html += `<p><strong>用藥情況:</strong> ${document.getElementById('medication').value || '未填寫'}</p>`;
+            html += `<p><strong>臨床症狀:</strong> ${document.getElementById('symptoms').value || '未填寫'}</p>`;
+            html += '</div>';
+            
+            html += '<div class="subsection">';
+            html += '<h3>飲食史</h3>';
+            html += `<p><strong>飲食攝取:</strong> ${document.getElementById('dietIntake').value || '未填寫'}</p>`;
+            html += `<p>熱量攝取: ${document.getElementById('energyIntake').value || '未填寫'} kcal/day | 蛋白質攝取: ${document.getElementById('proteinIntake').value || '未填寫'} g/day</p>`;
+            html += `<p><strong>飲食習慣:</strong> ${document.getElementById('dietHabit').value || '未填寫'}</p>`;
+            html += '</div>';
+            
+            html += '<div class="subsection">';
+            html += '<h3>個人史</h3>';
+            html += `<p><strong>生活型態:</strong> ${document.getElementById('lifestyle').value || '未填寫'}</p>`;
+            html += `<p><strong>社會經濟狀況:</strong> ${document.getElementById('socialEconomic').value || '未填寫'}</p>`;
+            html += '</div>';
+            html += '</div>';
+            
+            // Diagnosis
+            html += '<div class="section">';
+            html += '<h2>D - Diagnosis 營養診斷</h2>';
+            html += '<div class="pes-box">';
+            html += `<strong>PES陳述:</strong><br>${document.getElementById('pesPreview').textContent}`;
+            html += '</div>';
+            if (document.getElementById('diagnosis2').value) {
+                html += `<p><strong>次要診斷1:</strong> ${document.getElementById('diagnosis2').value}</p>`;
+            }
+            if (document.getElementById('diagnosis3').value) {
+                html += `<p><strong>次要診斷2:</strong> ${document.getElementById('diagnosis3').value}</p>`;
+            }
+            html += '</div>';
+            
+            // Intervention
+            html += '<div class="section">';
+            html += '<h2>I - Intervention 營養介入</h2>';
+            html += '<div class="subsection">';
+            html += '<h3>營養處方</h3>';
+            html += `<p>目標熱量: ${document.getElementById('targetEnergy').value || '未填寫'} kcal/day | 目標蛋白質: ${document.getElementById('targetProtein').value || '未填寫'} g/day | 目標體重: ${document.getElementById('targetWeight').value || '未填寫'} kg</p>`;
+            html += `<p><strong>飲食型態:</strong> ${document.getElementById('dietType').value || '未填寫'}</p>`;
+            html += `<p><strong>其他營養素目標:</strong> ${document.getElementById('otherNutrients').value || '未填寫'}</p>`;
+            html += '</div>';
+            
+            html += '<div class="subsection">';
+            html += '<h3>營養教育</h3>';
+            const eduTopics = [];
+            for (let i = 1; i <= 5; i++) {
+                const checkbox = document.getElementById('edu' + i);
+                if (checkbox.checked) eduTopics.push(checkbox.value);
+            }
+            html += `<p><strong>教育主題:</strong> ${eduTopics.join(', ') || '未選擇'}</p>`;
+            html += `<p><strong>教育內容:</strong> ${document.getElementById('educationContent').value || '未填寫'}</p>`;
+            html += `<p><strong>個案理解程度:</strong> ${document.getElementById('understanding').value || '未填寫'}</p>`;
+            html += '</div>';
+            
+            html += '<div class="subsection">';
+            html += '<h3>營養諮詢</h3>';
+            html += `<p><strong>行為改變目標:</strong> ${document.getElementById('behaviorGoal').value || '未填寫'}</p>`;
+            html += `<p><strong>諮詢策略:</strong> ${document.getElementById('counselingStrategy').value || '未填寫'}</p>`;
+            html += '</div>';
+            
+            html += '<div class="subsection">';
+            html += '<h3>營養照護協調</h3>';
+            html += `<p><strong>轉介或協調:</strong> ${document.getElementById('coordination').value || '未填寫'}</p>`;
+            html += `<p><strong>營養補充品處方:</strong> ${document.getElementById('supplements').value || '未填寫'}</p>`;
+            html += '</div>';
+            html += '</div>';
+            
+            // Monitoring
+            html += '<div class="section">';
+            html += '<h2>M - Monitoring 營養監測</h2>';
+            const monItems = [];
+            for (let i = 1; i <= 3; i++) {
+                const checkbox = document.getElementById('mon' + i);
+                if (checkbox.checked) monItems.push(checkbox.value);
+            }
+            html += `<p><strong>人體測量監測:</strong> ${monItems.join(', ') || '未選擇'}</p>`;
+            html += `<p><strong>生化監測:</strong> ${document.getElementById('monLab').value || '未填寫'}</p>`;
+            html += `<p><strong>飲食攝取監測:</strong> ${document.getElementById('monDiet').value || '未填寫'}</p>`;
+            html += `<p><strong>臨床症狀監測:</strong> ${document.getElementById('monSymptoms').value || '未填寫'}</p>`;
+            html += `<p><strong>追蹤頻率:</strong> ${document.getElementById('followUpFreq').value || '未填寫'}</p>`;
+            
+            const followMethods = [];
+            for (let i = 1; i <= 4; i++) {
+                const checkbox = document.getElementById('follow' + i);
+                if (checkbox.checked) followMethods.push(checkbox.value);
+            }
+            html += `<p><strong>追蹤方式:</strong> ${followMethods.join(', ') || '未選擇'}</p>`;
+            html += `<p><strong>監測計畫:</strong> ${document.getElementById('monitoringPlan').value || '未填寫'}</p>`;
+            html += '</div>';
+            
+            // Evaluation
+            html += '<div class="section">';
+            html += '<h2>E - Evaluation 成效評價</h2>';
+            html += `<p><strong>目標達成情況:</strong> ${document.getElementById('goalAchievement').value || '未填寫'}</p>`;
+            html += `<p><strong>人體測量變化:</strong> ${document.getElementById('evalAnthro').value || '未填寫'}</p>`;
+            html += `<p><strong>生化數值變化:</strong> ${document.getElementById('evalLab').value || '未填寫'}</p>`;
+            html += `<p><strong>飲食攝取改善:</strong> ${document.getElementById('evalDiet').value || '未填寫'}</p>`;
+            html += `<p><strong>行為改變:</strong> ${document.getElementById('evalBehavior').value || '未填寫'}</p>`;
+            html += `<p><strong>營養診斷調整:</strong> ${document.getElementById('diagnosisUpdate').value || '未填寫'}</p>`;
+            html += `<p><strong>介入策略調整:</strong> ${document.getElementById('interventionUpdate').value || '未填寫'}</p>`;
+            html += `<p><strong>下次追蹤重點:</strong> ${document.getElementById('nextFocus').value || '未填寫'}</p>`;
+            html += `<p><strong>結案或轉介:</strong> ${document.getElementById('discharge').value || '未填寫'}</p>`;
+            html += `<p><strong>營養師綜合評論:</strong> ${document.getElementById('overallComment').value || '未填寫'}</p>`;
+            html += '</div>';
+            
+            html += '</body></html>';
+            
+            // Create blob and download
+            const blob = new Blob(['\ufeff', html], {
+                type: 'application/msword'
+            });
+            
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ADIME營養紀錄_${patientName}_${recordDate}.doc`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html></p>
+</body>
+</html>

@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>PG-SGA</title>
+</head>
+<body>
+  <h2>PG-SGA</h2>
+  <p><!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PG-SGA 營養評估問卷</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(45deg, #4a90e2, #357abd);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.2em; margin: 0 0 10px 0; }
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+        }
+        .tab-button {
+            flex: 1;
+            padding: 15px;
+            background: #e9ecef;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .tab-button.active { background: white; color: #4a90e2; }
+        .tab-content { display: none; padding: 30px; }
+        .tab-content.active { display: block; }
+        .section {
+            background: #f8f9fa;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #4a90e2;
+        }
+        .section h3 { color: #2c3e50; margin-bottom: 15px; }
+        .form-row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 200px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .radio-group, .checkbox-group { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+        .radio-item, .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .radio-item:hover, .checkbox-item:hover { border-color: #4a90e2; }
+        .radio-item input, .checkbox-item input { 
+            margin-right: 10px; 
+            transform: scale(1.2);
+        }
+        .score { 
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+            text-align: center;
+            font-size: 18px;
+        }
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+        .btn-primary { background: #4a90e2; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-sm { padding: 8px 15px; font-size: 14px; }
+        .btn:hover { opacity: 0.9; }
+        .total-score {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        .record { border: 1px solid #ddd; margin: 15px 0; padding: 15px; border-radius: 8px; }
+        .record-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        
+        .additional-data {
+            margin-top: 30px;
+        }
+        .additional-data textarea {
+            min-height: 120px;
+            font-size: 16px;
+        }
+        
+        /* 詳細資料樣式 */
+        .detail-section {
+            background: white;
+            margin: 10px 0;
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+        }
+        .detail-item {
+            margin: 8px 0;
+            padding: 5px 0;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #495057;
+            display: inline-block;
+            width: 150px;
+        }
+        .detail-value {
+            color: #212529;
+        }
+        
+        /* 優化的列印樣式 - 放大字體並調整間距 */
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                font-size: 12pt !important; /* 適中的字體大小 */
+                font-family: 'Microsoft JhengHei', Arial, sans-serif !important;
+                line-height: 1.2 !important; /* 緊湊的行高 */
+            }
+            .container {
+                max-width: 100% !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                margin: 0 !important;
+                padding: 5mm !important; /* 減少內邊距 */
+            }
+            .no-print, .tabs, .btn, .tab-button {
+                display: none !important;
+            }
+            
+            .print-section {
+                margin: 2mm 0 !important; /* 減少間距 */
+                padding: 2mm !important; /* 減少內距 */
+                border: 1px solid #999 !important;
+                background: white !important;
+                page-break-inside: avoid !important;
+            }
+            
+            .print-grid {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 2mm !important; /* 減少間距 */
+                margin-bottom: 2mm !important;
+            }
+            
+            .print-title {
+                font-weight: bold !important;
+                margin-bottom: 1mm !important; /* 減少間距 */
+                font-size: 14pt !important; /* 適中的標題大小 */
+                border-bottom: 1px solid #333 !important;
+                padding-bottom: 0.5mm !important;
+            }
+            
+            .print-item {
+                margin: 0.5mm 0 !important; /* 減少間距 */
+                font-size: 11pt !important; /* 適中的內容大小 */
+                line-height: 1.2 !important; /* 緊湊的行高 */
+            }
+            
+            .print-score {
+                font-weight: bold !important;
+                background: #f8f9fa !important;
+                padding: 1mm !important; /* 減少內距 */
+                border-radius: 1mm !important;
+                font-size: 11pt !important; /* 適中的分數大小 */
+                text-align: center !important;
+                margin-top: 1mm !important;
+            }
+            
+            .print-total {
+                font-weight: bold !important;
+                font-size: 16pt !important; /* 適中的總分大小 */
+                text-align: center !important;
+                margin: 3mm 0 !important; /* 減少間距 */
+                padding: 2mm !important; /* 減少內距 */
+                background: #e9ecef !important;
+                border: 1px solid #333 !important;
+            }
+            
+            .print-advice {
+                font-weight: bold !important;
+                margin: 2mm 0 !important; /* 減少間距 */
+                padding: 2mm !important; /* 減少內距 */
+                background: #d4edda !important;
+                border: 1px solid #28a745 !important;
+                text-align: center !important;
+                font-size: 12pt !important; /* 適中的建議大小 */
+            }
+            
+            /* 確保所有內容在一頁內 */
+            .print-page {
+                height: 100%;
+                width: 100%;
+                page-break-after: always;
+            }
+            
+            /* 調整表格樣式以節省空間 */
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                font-size: 10pt;
+                margin: 1mm 0;
+            }
+            th, td {
+                border: 1px solid #ddd;
+                padding: 1mm;
+                text-align: left;
+            }
+            th {
+                background-color: #f5f5f5;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-row { flex-direction: column; }
+            .tabs { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 PG-SGA 營養評估系統</h1>
+            <p>Patient-Generated Subjective Global Assessment</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('survey')">📝 填寫問卷</button>
+            <button class="tab-button" onclick="switchTab('records')">📊 查看記錄</button>
+            <button class="tab-button" onclick="switchTab('export')">💾 匯出資料</button>
+        </div>
+
+        <!-- 問卷頁面 -->
+        <div id="survey" class="tab-content active">
+            <form id="pgsga-form">
+                <div class="section">
+                    <h3>基本資料</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>評估日期:</label>
+                            <input type="date" id="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>姓名:</label>
+                            <input type="text" id="name" placeholder="請輸入姓名" required>
+                        </div>
+                        <div class="form-group">
+                            <label>病歷號:</label>
+                            <input type="text" id="number" placeholder="請輸入病歷號" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>年齡:</label>
+                            <input type="number" id="age" placeholder="請輸入年齡" required>
+                        </div>
+                        <div class="form-group">
+                            <label>性別:</label>
+                            <select id="gender" required>
+                                <option value="">請選擇性別</option>
+                                <option value="male">男</option>
+                                <option value="female">女</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 治療方式區塊 -->
+                <div class="section">
+                    <h3>治療方式</h3>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="treatment" value="開刀" id="surgery">
+                            <label for="surgery">開刀</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="treatment" value="化療" id="chemotherapy">
+                            <label for="chemotherapy">化療</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="treatment" value="放療" id="radiotherapy">
+                            <label for="radiotherapy">放療</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="treatment" value="其他" id="other_treatment">
+                            <label for="other_treatment">其他</label>
+                            <input type="text" id="other_treatment_text" placeholder="請說明其他治療方式" style="margin-left: 10px; width: 200px;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>A1. 體重變化</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>目前體重 (kg):</label>
+                            <input type="number" id="currentWeight" step="0.1" placeholder="請輸入目前體重" required>
+                        </div>
+                        <div class="form-group">
+                            <label>身高 (cm):</label>
+                            <input type="number" id="height" step="0.1" placeholder="請輸入身高" required>
+                        </div>
+                        <div class="form-group">
+                            <label>一個月前體重 (kg):</label>
+                            <input type="number" id="oneMonthWeight" step="0.1" placeholder="請輸入一個月前體重">
+                        </div>
+                        <div class="form-group">
+                            <label>六個月前體重 (kg):</label>
+                            <input type="number" id="sixMonthWeight" step="0.1" placeholder="請輸入六個月前體重">
+                        </div>
+                    </div>
+                    
+                    <label><strong>兩個星期前體重變化:</strong></label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="acuteWeight" value="1" id="acute1">
+                            <label for="acute1">降低 (1分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="acuteWeight" value="0" id="acute0">
+                            <label for="acute0">沒有改變 (0分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="acuteWeight" value="0" id="acute_inc">
+                            <label for="acute_inc">增加 (0分)</label>
+                        </div>
+                    </div>
+
+                    <label><strong>體重變化程度:</strong></label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="subAcuteWeight" value="4" id="sub4">
+                            <label for="sub4">≥10%/1個月 (≥20%/6個月) - 4分</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="subAcuteWeight" value="3" id="sub3">
+                            <label for="sub3">5-9.9%/1個月 (10%-19.9%/6個月) - 3分</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="subAcuteWeight" value="2" id="sub2">
+                            <label for="sub2">3-4.9%/1個月 (6-9.9%/6個月) - 2分</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="subAcuteWeight" value="1" id="sub1">
+                            <label for="sub1">2-2.9%/1個月 (2-5.9%/6個月) - 1分</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="subAcuteWeight" value="0" id="sub0">
+                            <label for="sub0">0-1.9%/1個月 (0-1.9%/6個月) - 0分</label>
+                        </div>
+                    </div>
+                    <div class="score" id="A1-score">A1 得分: 0</div>
+                </div>
+
+                <div class="section">
+                    <h3>A2. 攝食情況</h3>
+                    <label><strong>最近攝食量與平常比較:</strong></label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="intakeComparison" value="0" id="intake_same">
+                            <label for="intake_same">沒改變 (0分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="intakeComparison" value="0" id="intake_more">
+                            <label for="intake_more">多 (0分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="intakeComparison" value="1" id="intake_less">
+                            <label for="intake_less">少 (1分)</label>
+                        </div>
+                    </div>
+
+                    <label><strong>目前攝食狀況:</strong></label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="currentIntake" value="1" id="normal_less">
+                            <label for="normal_less">正常飲食但較少 (1分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="currentIntake" value="2" id="little_solid">
+                            <label for="little_solid">少許固體食物 (2分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="currentIntake" value="3" id="liquid_food">
+                            <label for="liquid_food">液體食物 (3分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="currentIntake" value="3" id="supplements">
+                            <label for="supplements">營養補充品 (3分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="currentIntake" value="4" id="very_little">
+                            <label for="very_little">非常少 (4分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="currentIntake" value="0" id="tube_iv">
+                            <label for="tube_iv">僅靠管灌或靜脈營養 (0分)</label>
+                        </div>
+                    </div>
+                    <div class="score" id="A2-score">A2 得分: 0</div>
+                </div>
+
+                <div class="section">
+                    <h3>A3. 腸胃症狀</h3>
+                    <label><strong>影響近兩週攝食的症狀:</strong></label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="symptoms" value="0" id="no_problem">
+                            <label for="no_problem">沒有問題 (0分)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="symptoms" value="3" id="no_appetite">
+                            <label for="no_appetite">沒食慾 (3分)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="symptoms" value="1" id="nausea">
+                            <label for="nausea">噁心 (1分)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="symptoms" value="3" id="vomiting">
+                            <label for="vomiting">嘔吐 (3分)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="symptoms" value="1" id="constipation">
+                            <label for="constipation">便秘 (1分)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="symptoms" value="3" id="diarrhea">
+                            <label for="diarrhea">腹瀉 (3分)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="symptoms" value="2" id="mouth_pain">
+                            <label for="mouth_pain">口痛 (2分)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="symptoms" value="1" id="dry_mouth">
+                            <label for="dry_mouth">口乾 (1分)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="symptoms" value="1" id="other_symptoms">
+                            <label for="other_symptoms">其他 (1分)</label>
+                        </div>
+                    </div>
+                    <div class="score" id="A3-score">A3 得分: 0</div>
+                </div>
+
+                <div class="section">
+                    <h3>A4. 身體活動狀況</h3>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="activityStatus" value="0" id="normal_activity">
+                            <label for="normal_activity">正常 (0分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="activityStatus" value="1" id="mild_limited">
+                            <label for="mild_limited">輕微受限但能自理 (1分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="activityStatus" value="2" id="severe_limited">
+                            <label for="severe_limited">嚴重受限但臥床不超過半天 (2分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="activityStatus" value="3" id="bedridden">
+                            <label for="bedridden">長時間臥床 (3分)</label>
+                        </div>
+                    </div>
+                    <div class="score" id="A4-score">A4 得分: 0</div>
+                </div>
+
+                <div class="section">
+                    <h3>B. 疾病相關</h3>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="diseaseRelated" value="1" id="cancer">
+                            <label for="cancer">癌症 (1分)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="diseaseRelated" value="1" id="aids">
+                            <label for="aids">免疫缺陷 (1分)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="diseaseRelated" value="1" id="pressure_ulcer">
+                            <label for="pressure_ulcer">褥瘡 (1分)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="diseaseRelated" value="1" id="trauma">
+                            <label for="trauma">創傷 (1分)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="diseaseRelated" value="1" id="elderly">
+                            <label for="elderly">65歲以上 (1分)</label>
+                        </div>
+                    </div>
+                    <div class="score" id="B-score">B 得分: 0</div>
+                </div>
+
+                <div class="section">
+                    <h3>C. 代謝壓力</h3>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="metabolicStress" value="0" id="no_stress">
+                            <label for="no_stress">沒有發燒、無類固醇、無壓力 (0分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="metabolicStress" value="1" id="low_stress">
+                            <label for="low_stress">&lt;38℃、發燒時數&lt;72h、類固醇&lt;10mg prednisone/d 低度壓力 (1分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="metabolicStress" value="2" id="moderate_stress">
+                            <label for="moderate_stress">38〜38.8℃、發燒時數72h、類固醇10〜30mg prednisone/d 中度壓力 (2分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="metabolicStress" value="3" id="high_stress">
+                            <label for="high_stress">&gt;38.8℃、發燒時&gt;72h、類固醇&gt;30mg prednisone/d 高度壓力 (3分)</label>
+                        </div>
+                    </div>
+                    <div class="score" id="C-score">C 得分: 0</div>
+                </div>
+
+                <div class="section">
+                    <h3>D. 身體檢查</h3>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="physicalExam" value="0" id="no_deficit">
+                            <label for="no_deficit">沒缺乏 (0分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="physicalExam" value="1" id="mild_deficit">
+                            <label for="mild_deficit">輕度缺乏 (1分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="physicalExam" value="2" id="moderate_deficit">
+                            <label for="moderate_deficit">中度缺乏 (2分)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="physicalExam" value="3" id="severe_deficit">
+                            <label for="severe_deficit">重度缺乏 (3分)</label>
+                        </div>
+                    </div>
+                    <div class="score" id="D-score">D 得分: 0</div>
+                </div>
+
+                <!-- 其他數據區域 -->
+                <div class="section additional-data">
+                    <h3>其他數據</h3>
+                    <div class="form-group">
+                        <label>其他觀察或備註:</label>
+                        <textarea id="additional_notes" placeholder="請輸入其他相關觀察或備註..."></textarea>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="total-score" id="totalScore">總分: 0</div>
+                    <div class="score" id="advice" style="background: #17a2b8;">建議會顯示在這裡</div>
+                </div>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    <button type="submit" class="btn btn-success">💾 儲存問卷</button>
+                    <button type="button" class="btn btn-warning" onclick="resetForm()">🔄 重設</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 查看記錄頁面 -->
+        <div id="records" class="tab-content">
+            <div class="section">
+                <h3>📊 問卷記錄</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    <button class="btn btn-primary" onclick="loadRecords(); showRecords();">🔄 重新載入</button>
+                    <button class="btn btn-warning" onclick="clearRecords()">🗑️ 清除記錄</button>
+                </div>
+                <div id="recordsList"></div>
+            </div>
+        </div>
+
+        <!-- 匯出資料頁面 -->
+        <div id="export" class="tab-content">
+            <div class="section">
+                <h3>💾 資料匯出與列印</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    <button class="btn btn-success" onclick="exportJSON()">📄 JSON</button>
+                    <button class="btn btn-primary" onclick="exportCSV()">📊 CSV</button>
+                    <button class="btn btn-warning" onclick="exportHTML()">🌐 HTML</button>
+                </div>
+                
+                <div class="section">
+                    <h3>🖨️ 單一問卷列印</h3>
+                    <p>選擇要列印的問卷記錄（每份問卷將以單頁A4格式列印）：</p>
+                    <div id="printRecordsList"></div>
+                </div>
+                
+                <div id="exportResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化記錄陣列
+        let records = [];
+
+        // 載入記錄
+        function loadRecords() {
+            try {
+                const stored = localStorage.getItem('pgsga_records');
+                records = stored ? JSON.parse(stored) : [];
+                console.log('載入記錄:', records.length, '筆');
+            } catch (e) {
+                console.error('載入記錄錯誤:', e);
+                records = [];
+            }
+        }
+
+        // 儲存記錄
+        function saveRecords() {
+            try {
+                localStorage.setItem('pgsga_records', JSON.stringify(records));
+                console.log('儲存記錄成功');
+            } catch (e) {
+                console.error('儲存記錄錯誤:', e);
+            }
+        }
+
+        // 切換標籤頁
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'records') {
+                showRecords();
+            }
+            if (tabName === 'export') {
+                showPrintRecords();
+            }
+        }
+
+        // 更新分數
+        function updateScores() {
+            console.log('更新分數...');
+            
+            // A1 體重變化
+            const acute = parseInt(document.querySelector('input[name="acuteWeight"]:checked')?.value || 0);
+            const subAcute = parseInt(document.querySelector('input[name="subAcuteWeight"]:checked')?.value || 0);
+            const a1 = acute + subAcute;
+            document.getElementById('A1-score').textContent = `A1 得分: ${a1}`;
+
+            // A2 攝食情況
+            const intake1 = parseInt(document.querySelector('input[name="intakeComparison"]:checked')?.value || 0);
+            const intake2 = parseInt(document.querySelector('input[name="currentIntake"]:checked')?.value || 0);
+            const a2 = Math.max(intake1, intake2);
+            document.getElementById('A2-score').textContent = `A2 得分: ${a2}`;
+
+            // A3 腸胃症狀
+            const symptoms = document.querySelectorAll('input[name="symptoms"]:checked');
+            const a3 = Array.from(symptoms).reduce((sum, s) => sum + parseInt(s.value), 0);
+            document.getElementById('A3-score').textContent = `A3 得分: ${a3}`;
+
+            // A4 身體活動
+            const a4 = parseInt(document.querySelector('input[name="activityStatus"]:checked')?.value || 0);
+            document.getElementById('A4-score').textContent = `A4 得分: ${a4}`;
+
+            // B 疾病相關
+            const diseases = document.querySelectorAll('input[name="diseaseRelated"]:checked');
+            const b = Array.from(diseases).reduce((sum, d) => sum + parseInt(d.value), 0);
+            document.getElementById('B-score').textContent = `B 得分: ${b}`;
+
+            // C 代謝壓力
+            const c = parseInt(document.querySelector('input[name="metabolicStress"]:checked')?.value || 0);
+            document.getElementById('C-score').textContent = `C 得分: ${c}`;
+
+            // D 身體檢查
+            const d = parseInt(document.querySelector('input[name="physicalExam"]:checked')?.value || 0);
+            document.getElementById('D-score').textContent = `D 得分: ${d}`;
+
+            // 總分
+            const total = a1 + a2 + a3 + a4 + b + c + d;
+            document.getElementById('totalScore').textContent = `總分: ${total}`;
+
+            // 建議
+            let advice = '';
+            if (total >= 9) {
+                advice = '🚨 嚴重營養不良風險';
+            } else if (total >= 4) {
+                advice = '⚠️ 中度營養不良風險';
+            } else {
+                advice = '✅ 營養狀況良好';
+            }
+            document.getElementById('advice').textContent = advice;
+
+            return { a1, a2, a3, a4, b, c, d, total, advice };
+        }
+
+        // 收集表單資料
+        function collectData() {
+            const getSelected = (name) => {
+                const el = document.querySelector(`input[name="${name}"]:checked`);
+                return el ? { 
+                    value: el.value, 
+                    text: el.nextElementSibling.textContent.trim() 
+                } : null;
+            };
+
+            const getMultiSelected = (name) => {
+                const els = document.querySelectorAll(`input[name="${name}"]:checked`);
+                return Array.from(els).map(el => ({
+                    value: el.value,
+                    text: el.nextElementSibling.textContent.trim()
+                }));
+            };
+
+            // 處理治療方式
+            const treatments = getMultiSelected('treatment');
+            let treatmentText = treatments.map(t => t.text).join('； ');
+            
+            // 如果有其他治療方式，加入文字
+            const otherTreatment = document.getElementById('other_treatment_text').value;
+            if (otherTreatment) {
+                if (treatmentText) treatmentText += '； ';
+                treatmentText += '其他：' + otherTreatment;
+            }
+
+            const data = {
+                date: document.getElementById('date').value,
+                name: document.getElementById('name').value,
+                number: document.getElementById('number').value,
+                age: document.getElementById('age').value,
+                gender: document.getElementById('gender').value,
+                currentWeight: document.getElementById('currentWeight').value,
+                height: document.getElementById('height').value,
+                oneMonthWeight: document.getElementById('oneMonthWeight').value,
+                sixMonthWeight: document.getElementById('sixMonthWeight').value,
+                treatment: treatmentText,
+                acuteWeight: getSelected('acuteWeight'),
+                subAcuteWeight: getSelected('subAcuteWeight'),
+                intakeComparison: getSelected('intakeComparison'),
+                currentIntake: getSelected('currentIntake'),
+                symptoms: getMultiSelected('symptoms'),
+                activityStatus: getSelected('activityStatus'),
+                diseaseRelated: getMultiSelected('diseaseRelated'),
+                metabolicStress: getSelected('metabolicStress'),
+                physicalExam: getSelected('physicalExam'),
+                additionalNotes: document.getElementById('additional_notes').value,
+                scores: updateScores(),
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log('收集的資料:', data);
+            return data;
+        }
+
+        // Helper: 把選項物件/陣列轉成可顯示文字
+        function selText(sel) {
+            if (!sel) return '';
+            if (Array.isArray(sel)) return sel.map(s => s.text).join('； ');
+            return sel.text || '';
+        }
+
+        // 重設表單
+        function resetForm() {
+            if (confirm('確定要重設表單嗎？所有輸入的資料將會遺失。')) {
+                document.getElementById('pgsga-form').reset();
+                document.getElementById('date').value = new Date().toISOString().split('T')[0];
+                updateScores();
+            }
+        }
+
+        // 顯示詳細資料
+        function showRecordDetails(record, index) {
+            return `
+                <div class="detail-section">
+                    <h4>📋 詳細填寫資料</h4>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">基本資料:</span>
+                        <span class="detail-value">${record.age}歲 ${record.gender === 'male' ? '男' : '女'} | 身高:${record.height}cm | 體重:${record.currentWeight}kg</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">體重數據:</span>
+                        <span class="detail-value">目前:${record.currentWeight}kg | 一個月前:${record.oneMonthWeight || '未填'}kg | 六個月前:${record.sixMonthWeight || '未填'}kg</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">治療方式:</span>
+                        <span class="detail-value">${record.treatment || '無'}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">A1. 體重變化:</span>
+                        <span class="detail-value">${selText(record.acuteWeight)}；${selText(record.subAcuteWeight)}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">A2. 攝食情況:</span>
+                        <span class="detail-value">${selText(record.intakeComparison)}；${selText(record.currentIntake)}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">A3. 腸胃症狀:</span>
+                        <span class="detail-value">${selText(record.symptoms) || '無症狀'}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">A4. 身體活動:</span>
+                        <span class="detail-value">${selText(record.activityStatus)}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">B. 疾病相關:</span>
+                        <span class="detail-value">${selText(record.diseaseRelated) || '無'}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">C. 代謝壓力:</span>
+                        <span class="detail-value">${selText(record.metabolicStress)}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">D. 身體檢查:</span>
+                        <span class="detail-value">${selText(record.physicalExam)}</span>
+                    </div>
+                    
+                    ${record.additionalNotes ? `
+                    <div class="detail-item">
+                        <span class="detail-label">其他數據:</span>
+                        <span class="detail-value">${record.additionalNotes}</span>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">各項分數:</span>
+                        <span class="detail-value">A1:${record.scores.a1} | A2:${record.scores.a2} | A3:${record.scores.a3} | A4:${record.scores.a4} | B:${record.scores.b} | C:${record.scores.c} | D:${record.scores.d}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">總分與建議:</span>
+                        <span class="detail-value"><strong>${record.scores.total}分 - ${record.scores.advice}</strong></span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 顯示記錄
+        function showRecords() {
+            const list = document.getElementById('recordsList');
+            if (records.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666;">尚無記錄</p>';
+                return;
+            }
+
+            list.innerHTML = records.map((record, index) => `
+                <div class="record">
+                    <div class="record-header">
+                        <h4>${record.name} (${record.number}) - ${new Date(record.date).toLocaleDateString('zh-TW')}</h4>
+                        <div>
+                            <button class="btn btn-info btn-sm" onclick="toggleDetails(${index})">📖 查看詳細</button>
+                            <button class="btn btn-warning btn-sm" onclick="deleteRecord(${index})">🗑️ 刪除</button>
+                        </div>
+                    </div>
+                    <p><strong>基本:</strong> ${record.age}歲 ${record.gender === 'male' ? '男' : '女'} | 身高:${record.height}cm 體重:${record.currentWeight}kg</p>
+                    <p><strong>治療方式:</strong> ${record.treatment || '無'}</p>
+                    <p><strong>分數:</strong> A1:${record.scores.a1} A2:${record.scores.a2} A3:${record.scores.a3} A4:${record.scores.a4} B:${record.scores.b} C:${record.scores.c} D:${record.scores.d}</p>
+                    <p><strong>總分:</strong> ${record.scores.total} - ${record.scores.advice}</p>
+                    <p><strong>其他數據:</strong> ${record.additionalNotes || '無'}</p>
+                    
+                    <div id="details-${index}" style="display: none; margin-top: 15px;">
+                        ${showRecordDetails(record, index)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 切換詳細資料顯示
+        function toggleDetails(index) {
+            const detailsDiv = document.getElementById(`details-${index}`);
+            if (detailsDiv.style.display === 'none') {
+                detailsDiv.style.display = 'block';
+            } else {
+                detailsDiv.style.display = 'none';
+            }
+        }
+
+        // 顯示可列印的記錄列表
+        function showPrintRecords() {
+            const list = document.getElementById('printRecordsList');
+            if (records.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666;">尚無記錄可列印</p>';
+                return;
+            }
+
+            list.innerHTML = records.map((record, index) => `
+                <div class="record">
+                    <div class="record-header">
+                        <h4>${record.name} (${record.number}) - ${new Date(record.date).toLocaleDateString('zh-TW')}</h4>
+                        <button class="btn btn-info" onclick="printSingleRecord(${index})">🖨️ 列印此問卷</button>
+                    </div>
+                    <p><strong>基本:</strong> ${record.age}歲 ${record.gender === 'male' ? '男' : '女'} | 總分: ${record.scores.total} - ${record.scores.advice}</p>
+                </div>
+            `).join('');
+        }
+
+        // 刪除單筆記錄
+        function deleteRecord(index) {
+            if (!confirm('確定要刪除這筆記錄嗎？')) return;
+            records.splice(index, 1);
+            saveRecords();
+            showRecords();
+            showPrintRecords();
+        }
+
+        // 清除記錄
+        function clearRecords() {
+            if (confirm('確定要清除所有記錄嗎？這個動作無法復原。')) {
+                records = [];
+                saveRecords();
+                showRecords();
+                showPrintRecords();
+            }
+        }
+
+        // 列印單一問卷記錄 - 優化為一頁A4
+        function printSingleRecord(index) {
+            const record = records[index];
+            if (!record) {
+                alert('找不到記錄');
+                return;
+            }
+
+            console.log('列印記錄:', record);
+
+            const printHTML = `
+                <div class="print-page">
+                    <div style="text-align: center; margin-bottom: 5mm; border-bottom: 1px solid #333; padding-bottom: 2mm;">
+                        <h1 style="margin: 0; font-size: 16pt;">PG-SGA 營養評估問卷</h1>
+                        <p style="margin: 1mm 0; font-size: 11pt;">列印日期: ${new Date().toLocaleDateString('zh-TW')}</p>
+                    </div>
+                    
+                    <!-- 基本資料 -->
+                    <div class="print-section">
+                        <div class="print-title">基本資料</div>
+                        <div class="print-grid">
+                            <div class="print-item"><strong>姓名:</strong> ${record.name}</div>
+                            <div class="print-item"><strong>病歷號:</strong> ${record.number}</div>
+                            <div class="print-item"><strong>評估日期:</strong> ${new Date(record.date).toLocaleDateString('zh-TW')}</div>
+                            <div class="print-item"><strong>年齡:</strong> ${record.age}歲</div>
+                            <div class="print-item"><strong>性別:</strong> ${record.gender === 'male' ? '男' : '女'}</div>
+                            <div class="print-item"><strong>治療方式:</strong> ${record.treatment || '無'}</div>
+                        </div>
+                    </div>
+
+                    <!-- 身體測量 -->
+                    <div class="print-section">
+                        <div class="print-title">身體測量數據</div>
+                        <div class="print-grid">
+                            <div class="print-item"><strong>身高:</strong> ${record.height} cm</div>
+                            <div class="print-item"><strong>目前體重:</strong> ${record.currentWeight} kg</div>
+                            <div class="print-item"><strong>一個月前體重:</strong> ${record.oneMonthWeight || '未填'} kg</div>
+                            <div class="print-item"><strong>六個月前體重:</strong> ${record.sixMonthWeight || '未填'} kg</div>
+                        </div>
+                    </div>
+
+                    <!-- 評估項目 - 兩欄佈局 -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2mm;">
+                        <!-- 左欄 -->
+                        <div>
+                            <div class="print-section">
+                                <div class="print-title">A1. 體重變化</div>
+                                <div class="print-item">${selText(record.acuteWeight)}</div>
+                                <div class="print-item">${selText(record.subAcuteWeight)}</div>
+                                <div class="print-score">A1 得分: ${record.scores.a1}</div>
+                            </div>
+
+                            <div class="print-section">
+                                <div class="print-title">A2. 攝食情況</div>
+                                <div class="print-item">${selText(record.intakeComparison)}</div>
+                                <div class="print-item">${selText(record.currentIntake)}</div>
+                                <div class="print-score">A2 得分: ${record.scores.a2}</div>
+                            </div>
+
+                            <div class="print-section">
+                                <div class="print-title">A3. 腸胃症狀</div>
+                                <div class="print-item">${selText(record.symptoms) || '無症狀'}</div>
+                                <div class="print-score">A3 得分: ${record.scores.a3}</div>
+                            </div>
+                        </div>
+
+                        <!-- 右欄 -->
+                        <div>
+                            <div class="print-section">
+                                <div class="print-title">A4. 身體活動</div>
+                                <div class="print-item">${selText(record.activityStatus)}</div>
+                                <div class="print-score">A4 得分: ${record.scores.a4}</div>
+                            </div>
+
+                            <div class="print-section">
+                                <div class="print-title">B. 疾病相關</div>
+                                <div class="print-item">${selText(record.diseaseRelated) || '無'}</div>
+                                <div class="print-score">B 得分: ${record.scores.b}</div>
+                            </div>
+
+                            <div class="print-section">
+                                <div class="print-title">C. 代謝壓力</div>
+                                <div class="print-item">${selText(record.metabolicStress)}</div>
+                                <div class="print-score">C 得分: ${record.scores.c}</div>
+                            </div>
+
+                            <div class="print-section">
+                                <div class="print-title">D. 身體檢查</div>
+                                <div class="print-item">${selText(record.physicalExam)}</div>
+                                <div class="print-score">D 得分: ${record.scores.d}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 其他數據 -->
+                    ${record.additionalNotes ? `
+                    <div class="print-section">
+                        <div class="print-title">其他數據</div>
+                        <div class="print-item" style="font-size: 10pt; line-height: 1.2;">${record.additionalNotes}</div>
+                    </div>
+                    ` : ''}
+
+                    <!-- 總分和建議 -->
+                    <div class="print-total">
+                        總分: ${record.scores.total}
+                    </div>
+
+                    <div class="print-advice">
+                        評估建議: ${record.scores.advice}
+                    </div>
+
+                    <div style="text-align: center; margin-top: 3mm; font-size: 9pt; color: #666;">
+                        <p>PG-SGA 營養評估問卷 - 本問卷僅供醫療專業人員使用</p>
+                    </div>
+                </div>
+            `;
+
+            // 建立列印視窗
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            if (!printWindow) {
+                alert('請允許彈出視窗以進行列印');
+                return;
+            }
+
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>PG-SGA 問卷列印 - ${record.name}</title>
+                    <meta charset="UTF-8">
+                    <style>
+                        body {
+                            font-family: Microsoft JhengHei, Arial, sans-serif;
+                            margin: 0;
+                            padding: 0;
+                            font-size: 12pt;
+                            line-height: 1.2;
+                        }
+                        @media print {
+                            body {
+                                margin: 0;
+                                padding: 0;
+                            }
+                            @page {
+                                size: A4;
+                                margin: 5mm;
+                            }
+                        }
+                        .print-page {
+                            height: 100%;
+                            width: 100%;
+                            page-break-after: always;
+                        }
+                        .print-section {
+                            margin: 2mm 0;
+                            padding: 2mm;
+                            border: 1px solid #999;
+                            background: white;
+                            page-break-inside: avoid;
+                        }
+                        .print-grid {
+                            display: grid;
+                            grid-template-columns: 1fr 1fr;
+                            gap: 2mm;
+                            margin-bottom: 2mm;
+                        }
+                        .print-title {
+                            font-weight: bold;
+                            margin-bottom: 1mm;
+                            font-size: 14pt;
+                            border-bottom: 1px solid #333;
+                            padding-bottom: 0.5mm;
+                        }
+                        .print-item {
+                            margin: 0.5mm 0;
+                            font-size: 11pt;
+                            line-height: 1.2;
+                        }
+                        .print-score {
+                            font-weight: bold;
+                            background: #f8f9fa;
+                            padding: 1mm;
+                            border-radius: 1mm;
+                            font-size: 11pt;
+                            text-align: center;
+                            margin-top: 1mm;
+                        }
+                        .print-total {
+                            font-weight: bold;
+                            font-size: 16pt;
+                            text-align: center;
+                            margin: 3mm 0;
+                            padding: 2mm;
+                            background: #e9ecef;
+                            border: 1px solid #333;
+                        }
+                        .print-advice {
+                            font-weight: bold;
+                            margin: 2mm 0;
+                            padding: 2mm;
+                            background: #d4edda;
+                            border: 1px solid #28a745;
+                            text-align: center;
+                            font-size: 12pt;
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${printHTML}
+                    <script>
+                        setTimeout(() => {
+                            window.print();
+                        }, 500);
+                    <\/script>
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+        }
+
+        // 匯出JSON
+        function exportJSON() {
+            if (records.length === 0) {
+                alert('沒有資料可匯出');
+                return;
+            }
+            const data = JSON.stringify(records, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pgsga_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            document.getElementById('exportResult').innerHTML = '<div class="score">✅ JSON已下載</div>';
+        }
+
+        // 匯出CSV
+        function exportCSV() {
+            if (records.length === 0) {
+                alert('沒有資料可匯出');
+                return;
+            }
+
+            const headers = ['日期', '姓名', '病歷號', '年齡', '性別', '身高', '目前體重', '一個月前體重', '六個月前體重', '治療方式', 'A1分數', 'A2分數', 'A3分數', 'A4分數', 'B分數', 'C分數', 'D分數', '總分', '建議', '其他數據'];
+
+            const escapeCSV = (v) => '"' + String(v === undefined || v === null ? '' : v).replace(/"/g, '""') + '"';
+
+            const csvData = [
+                headers.join(','),
+                ...records.map(r => [
+                    r.date,
+                    r.name,
+                    r.number,
+                    r.age,
+                    r.gender === 'male' ? '男' : '女',
+                    r.height,
+                    r.currentWeight,
+                    r.oneMonthWeight || '',
+                    r.sixMonthWeight || '',
+                    r.treatment || '',
+                    r.scores.a1,
+                    r.scores.a2,
+                    r.scores.a3,
+                    r.scores.a4,
+                    r.scores.b,
+                    r.scores.c,
+                    r.scores.d,
+                    r.scores.total,
+                    r.scores.advice,
+                    r.additionalNotes || ''
+                ].map(escapeCSV).join(','))
+            ].join('\n');
+
+            const blob = new Blob(['\ufeff' + csvData], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pgsga_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            document.getElementById('exportResult').innerHTML = '<div class="score">✅ CSV已下載</div>';
+        }
+
+        // 匯出HTML
+        function exportHTML() {
+            if (records.length === 0) {
+                alert('沒有資料可匯出');
+                return;
+            }
+
+            const html = `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>PG-SGA評估報告</title>
+    <style>
+        body { font-family: Microsoft JhengHei, Arial, sans-serif; margin: 20px; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+        .record { border: 1px solid #ddd; margin: 20px 0; padding: 15px; border-radius: 8px; }
+        .record h3 { background: #f5f5f5; padding: 10px; margin: -15px -15px 15px -15px; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f5f5f5; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PG-SGA 營養評估報告</h1>
+        <p>生成時間: ${new Date().toLocaleString('zh-TW')}</p>
+    </div>
+    ${records.map((r, i) => `
+        <div class="record">
+            <h3>記錄 ${i + 1}: ${r.name} (${r.number}) - ${new Date(r.date).toLocaleDateString('zh-TW')}</h3>
+            <table>
+                <tr><th>項目</th><th>內容</th></tr>
+                <tr><td>基本資料</td><td>年齡: ${r.age}歲, 性別: ${r.gender === 'male' ? '男' : '女'}</td></tr>
+                <tr><td>身體測量</td><td>身高: ${r.height}cm, 體重: ${r.currentWeight}kg</td></tr>
+                <tr><td>體重數據</td><td>目前: ${r.currentWeight}kg | 一個月前: ${r.oneMonthWeight || '未填'}kg | 六個月前: ${r.sixMonthWeight || '未填'}kg</td></tr>
+                <tr><td>治療方式</td><td>${r.treatment || '無'}</td></tr>
+                <tr><td>其他數據</td><td>${r.additionalNotes || '無'}</td></tr>
+                <tr><td>各項分數</td><td>A1:${r.scores.a1} A2:${r.scores.a2} A3:${r.scores.a3} A4:${r.scores.a4} B:${r.scores.b} C:${r.scores.c} D:${r.scores.d}</td></tr>
+                <tr><td><strong>總分</strong></td><td><strong>${r.scores.total}</strong></td></tr>
+                <tr><td>建議</td><td>${r.scores.advice}</td></tr>
+            </table>
+        </div>
+    `).join('')}
+</body>
+</html>`;
+
+            const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pgsga_report_${new Date().toISOString().split('T')[0]}.html`;
+            a.click();
+            URL.revokeObjectURL(url);
+            document.getElementById('exportResult').innerHTML = '<div class="score">✅ HTML報告已下載</div>';
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('初始化PG-SGA系統...');
+            
+            // 載入記錄
+            loadRecords();
+            
+            // 設定預設日期為今天
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+            
+            // 綁定事件監聽器
+            document.querySelectorAll('input, select').forEach(input => {
+                input.addEventListener('change', updateScores);
+            });
+
+            // 表單提交事件
+            document.getElementById('pgsga-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('表單提交...');
+                
+                const data = collectData();
+                if (!data.name || !data.number || !data.age) {
+                    alert('請填寫必要資料（姓名、病歷號、年齡）');
+                    return;
+                }
+                
+                records.push(data);
+                saveRecords();
+                alert('問卷已儲存！');
+                switchTab('records');
+            });
+            
+            // 初始更新分數
+            updateScores();
+            
+            console.log('PG-SGA系統初始化完成');
+        });
+    </script>
+</body>
+</html></p>
+</body>
+</html>
