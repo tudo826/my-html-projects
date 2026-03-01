@@ -1,218 +1,490 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <title>MIS評分表</title>
-</head>
-<body>
-  <h2>MIS評分表</h2>
-  <p><!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8">
-  <title>MIS 中文版 App</title>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
-    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; vertical-align: middle; }
-    th { background-color: #f2f2f2; }
-    .normal { background-color: #c8e6c9; }
-    .moderate { background-color: #fff9c4; }
-    .severe { background-color: #ffcdd2; }
-    .controls { margin: 10px 0; }
-    button { margin-right: 10px; padding: 5px 10px; }
-    select, input { width: 100%; }
-  </style>
-</head>
-<body>
-  <h1>Comprehensive Malnutrition-Inflammation Score (MIS) 中文版</h1>
-  <div class="controls">
-    <button onclick="addRow()">新增病人</button>
-    <button onclick="exportCSV()">匯出 CSV</button>
-    <button onclick="exportExcel()">匯出 Excel</button>
-    <button onclick="clearData()">清空資料</button>
-  </div>
-  <table id="misTable">
-    <thead>
-      <tr>
-        <th>病人ID</th>
-        <th>姓名</th>
-        <th>年齡</th>
-        <th>性別</th>
-        <th>1. 體重變化</th>
-        <th>2. 飲食攝取量</th>
-        <th>3. 胃腸道症狀</th>
-        <th>4. 功能能力</th>
-        <th>5. 併發症/發炎+透析年資</th>
-        <th>6. BMI</th>
-        <th>7. 體脂肪量</th>
-        <th>8. 肌肉量</th>
-        <th>9. 白蛋白</th>
-        <th>10. TIBC</th>
-        <th>總分</th>
-        <th>解讀</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <h2>統計總結</h2>
-  <canvas id="chart" width="400" height="200"></canvas>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    const misTable = document.getElementById('misTable').getElementsByTagName('tbody')[0];
-    const STORAGE_KEY = "MIS_DATA";
-
-    const questions = [
-      ["0=無下降","1=5—10% 體重下降","2=10—15% 體重下降","3=>15% 體重下降"],
-      ["0=正常","1=輕度減少","2=中度減少","3=幾乎沒有"],
-      ["0=無","1=輕度(偶爾噁心/厭食)","2=中度(常嘔吐/腹瀉)","3=嚴重(持續嘔吐/厭食)"],
-      ["0=正常","1=輕度下降","2=中度下降","3=臥床失能"],
-      ["0=無發炎且透析<1年","1=輕度發炎或透析1-4年","2=中度發炎或透析5-10年","3=嚴重發炎或透析>10年"],
-      ["0=≥20","1=18—19.9","2=16—17.9","3=<16"],
-      ["0=正常","1=輕度減少","2=中度減少","3=嚴重減少"],
-      ["0=正常","1=輕度減少","2=中度減少","3=嚴重減少"],
-      ["0=Alb≥4","1=Alb3.5—3.9","2=Alb3.0—3.4","3=Alb<3.0"],
-      ["0=TIBC>250mg/dl","1=TIBC 200~249mg/dl","2=TIBC 150~199mg/dl","3=TIBC<150mg/dl"]
-    ];
-
-    function addRow(patient = null) {
-      const row = misTable.insertRow();
-      // 基本資料欄
-      const idCell = row.insertCell();
-      const idInput = document.createElement('input'); idInput.value = patient ? patient.id : ""; idCell.appendChild(idInput);
-      const nameCell = row.insertCell();
-      const nameInput = document.createElement('input'); nameInput.value = patient ? patient.name : ""; nameCell.appendChild(nameInput);
-      const ageCell = row.insertCell();
-      const ageInput = document.createElement('input'); ageInput.type="number"; ageInput.value = patient ? patient.age : ""; ageCell.appendChild(ageInput);
-      const genderCell = row.insertCell();
-      const genderSelect = document.createElement('select');
-      ["","男","女"].forEach(g => { let opt=document.createElement('option'); opt.value=g; opt.textContent=g; genderSelect.appendChild(opt); });
-      genderSelect.value = patient ? patient.gender : ""; genderCell.appendChild(genderSelect);
-
-      // MIS 題目
-      for (let i=0; i<10; i++) {
-        const cell = row.insertCell();
-        const select = document.createElement('select');
-        questions[i].forEach((desc,score)=>{
-          let opt=document.createElement('option');
-          opt.value=score; opt.textContent=desc;
-          select.appendChild(opt);
-        });
-        select.value = patient ? patient.mis[i] : 0;
-        select.onchange=()=>updateRow(row);
-        cell.appendChild(select);
-      }
-
-      const totalCell=row.insertCell();
-      const interpCell=row.insertCell();
-      updateRow(row);
-    }
-
-    function updateRow(row) {
-      const selects = row.querySelectorAll('select');
-      const misScores = Array.from(selects).slice(1).map(s => parseInt(s.value));
-      const total = misScores.reduce((a,b)=>a+b,0);
-      row.cells[row.cells.length-2].textContent = total;
-      let interp = "";
-      row.className = "";
-      if (total <= 7) { interp="正常"; row.className="normal"; }
-      else if (total <= 18) { interp="輕中度"; row.className="moderate"; }
-      else { interp="嚴重"; row.className="severe"; }
-      row.cells[row.cells.length-1].textContent = interp;
-      saveData();
-      updateChart();
-    }
-
-    function saveData() {
-      const data = [];
-      Array.from(misTable.rows).forEach(row => {
-        const inputs = row.querySelectorAll('input,select');
-        const patient = {
-          id: inputs[0].value,
-          name: inputs[1].value,
-          age: inputs[2].value,
-          gender: inputs[3].value,
-          mis: Array.from(inputs).slice(4,14).map(s => s.value),
-          total: row.cells[row.cells.length-2].textContent,
-          interp: row.cells[row.cells.length-1].textContent
-        };
-        data.push(patient);
-      });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }
-
-    function loadData() {
-      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-      data.forEach(p => addRow(p));
-    }
-
-    function clearData() {
-      misTable.innerHTML = "";
-      localStorage.removeItem(STORAGE_KEY);
-      updateChart();
-    }
-
-    function exportCSV() {
-      let csv = "病人ID,姓名,年齡,性別," + Array.from({length:10},(_,i)=>"Q"+(i+1)).join(",") + ",總分,解讀\n";
-      Array.from(misTable.rows).forEach(row => {
-        const vals = [];
-        row.querySelectorAll('input,select').forEach(el => vals.push(el.value));
-        vals.push(row.cells[row.cells.length-2].textContent);
-        vals.push(row.cells[row.cells.length-1].textContent);
-        csv += vals.join(",") + "\n";
-      });
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = "MIS_data.csv";
-      a.click();
-    }
-
-    function exportExcel() {
-      const wb = XLSX.utils.book_new();
-      const data = [];
-      const header = ["病人ID","姓名","年齡","性別"];
-      for (let i=1;i<=10;i++) header.push("Q"+i);
-      header.push("總分","解讀");
-      data.push(header);
-      Array.from(misTable.rows).forEach(row => {
-        const vals = [];
-        row.querySelectorAll('input,select').forEach(el => vals.push(el.value));
-        vals.push(row.cells[row.cells.length-2].textContent);
-        vals.push(row.cells[row.cells.length-1].textContent);
-        data.push(vals);
-      });
-      const ws = XLSX.utils.aoa_to_sheet(data);
-      XLSX.utils.book_append_sheet(wb, ws, "MIS Data");
-      XLSX.writeFile(wb, "MIS_data.xlsx");
-    }
-
-    let chart;
-    function updateChart() {
-      const counts = {正常:0, 輕中度:0, 嚴重:0};
-      Array.from(misTable.rows).forEach(row => {
-        const interp = row.cells[row.cells.length-1].textContent;
-        if (counts[interp] !== undefined) counts[interp]++;
-      });
-      const ctx = document.getElementById('chart').getContext('2d');
-      if (chart) chart.destroy();
-      chart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-          labels: ["正常","輕中度","嚴重"],
-          datasets: [{
-            data: [counts.正常, counts.輕中度, counts.嚴重],
-            backgroundColor: ["#81c784","#fff176","#e57373"]
-          }]
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIS 營養評估系統 (大字版)</title>
+    <style>
+        /* ================= 網頁版樣式 (維持您喜歡的原樣) ================= */
+        :root {
+            --primary-color: #0056b3;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-radius: 12px;
         }
-      });
+
+        body {
+            font-family: "Microsoft JhengHei", -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 120px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        /* 標頭 */
+        .header-section {
+            text-align: center; margin-bottom: 20px;
+            background: white; padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .patient-info {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+            margin-top: 15px; text-align: left;
+        }
+        .input-field {
+            width: 100%; padding: 10px; border: 1px solid #ccc;
+            border-radius: 6px; font-size: 1.1rem; /* 螢幕輸入框也稍微加大 */
+        }
+
+        /* 卡片 */
+        .section-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px; margin-bottom: 15px; border: 1px solid #e0e0e0;
+        }
+        .section-title {
+            font-size: 1.2rem; font-weight: bold; color: var(--primary-color);
+            border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px;
+        }
+
+        .question-block { margin-bottom: 20px; }
+        .question-label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 1.05rem; }
+
+        /* 選項 */
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        @media (min-width: 600px) { .options-grid { grid-template-columns: 1fr 1fr; } }
+
+        .radio-label {
+            display: flex; align-items: center; background: #f8f9fa; padding: 12px; /* 加大點擊區域 */
+            border-radius: 8px; cursor: pointer; border: 1px solid #ddd; font-size: 1rem;
+        }
+        .radio-label:hover { background: #e9ecef; }
+        input[type="radio"] { margin-right: 10px; transform: scale(1.2); } /* 加大按鈕 */
+        .radio-label:has(input:checked) { background: #e7f1ff; border-color: var(--primary-color); color: var(--primary-color); font-weight: bold; }
+
+        /* 輸入與Badge */
+        .input-group { display: flex; align-items: center; gap: 10px; }
+        input[type="number"] { padding: 8px; border: 1px solid #ccc; border-radius: 6px; width: 90px; font-size: 1rem; }
+        .auto-score-badge { background-color: #e9ecef; padding: 5px 12px; border-radius: 15px; font-size: 0.9rem; font-weight: bold; }
+        .helper-text { font-size: 0.85rem; color: #666; margin-top: 5px; }
+
+        /* 底部Bar */
+        .footer-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; padding: 15px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex; justify-content: space-between; align-items: center; z-index: 1000;
+        }
+        .btn {
+            padding: 12px 24px; border-radius: 8px; font-size: 1.1rem;
+            cursor: pointer; font-weight: bold; border: none; color: white;
+        }
+        .btn-save { background-color: #28a745; }
+        .btn-print { background-color: #6c757d; }
+        .btn-export { background-color: #17a2b8; }
+        
+        /* 歷史紀錄 */
+        #historySection { margin-top: 30px; background: white; padding: 20px; border-radius: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
+        .btn-del { background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+
+        .signature-area, .print-score-header { display: none; }
+
+        /* ================= 🖨 列印專用樣式 (A4 大字版) ================= */
+        @media print {
+            @page { 
+                size: A4; 
+                margin: 0.5cm; /* 極窄邊界，讓空間給字體 */
+            }
+
+            body {
+                background: white; padding: 0; margin: 0;
+                font-family: "Microsoft JhengHei", sans-serif;
+                font-size: 12.5pt; /* 基礎字體放大 */
+                line-height: 1.3;  /* 稍微緊湊的行距以防溢出 */
+                -webkit-print-color-adjust: exact;
+            }
+
+            /* 隱藏區塊 */
+            .footer-bar, #historySection, .btn, .helper-text { display: none !important; }
+            .container { max-width: 100%; width: 100%; }
+
+            /* 標頭 */
+            .header-section {
+                padding: 5px; margin-bottom: 10px;
+                border-bottom: 2px solid #000; border-radius: 0; box-shadow: none;
+                display: flex; justify-content: space-between; align-items: center;
+            }
+            .header-section h2 { margin: 0; font-size: 1.8rem; } /* 標題加大 */
+            
+            .patient-info { display: flex; gap: 30px; margin-top: 0; }
+            .input-field { 
+                border: none; border-bottom: 1px solid #000; 
+                border-radius: 0; padding: 0; font-weight: bold; 
+                width: auto; font-size: 13pt; 
+            }
+            .input-field::placeholder { color: transparent; }
+
+            /* 分數顯示 */
+            .print-score-header {
+                display: block; font-weight: bold; font-size: 1.4rem;
+            }
+            #pScoreDisplay { border: 2px solid #000; padding: 2px 10px; margin: 0 5px; }
+
+            /* 雙欄排版 */
+            #misForm {
+                display: grid;
+                grid-template-columns: 49% 49%; /* 左右欄 */
+                column-gap: 2%;
+                align-items: start;
+            }
+            .section-card:nth-of-type(1) { grid-column: 1; grid-row: 1 / span 2; }
+            .section-card:nth-of-type(2) { grid-column: 2; grid-row: 1; }
+            .section-card:nth-of-type(3) { grid-column: 2; grid-row: 2; }
+
+            /* 內容樣式調整 */
+            .section-card { padding: 0; margin-bottom: 10px; border: none; }
+            .section-title {
+                font-size: 1.3rem; margin-bottom: 5px; padding-bottom: 2px;
+                border-bottom: 2px solid #000; color: #000;
+            }
+            .question-block { margin-bottom: 8px; page-break-inside: avoid; }
+            .question-label { margin-bottom: 2px; font-size: 13pt; font-weight: 700; }
+
+            /* 選項加大 */
+            .options-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+            .radio-label {
+                padding: 2px 5px; font-size: 12pt; /* 選項字體加大 */
+                background: none; border: 1px solid transparent;
+            }
+            /* 選中樣式 */
+            .radio-label:has(input:checked) {
+                border: 2px solid #000; background: #f0f0f0; font-weight: bold;
+            }
+            /* 未選中稍微變淡 */
+            .radio-label:not(:has(input:checked)) { opacity: 0.6; font-size: 11pt; } 
+            input[type="radio"] { display: none; } /* 隱藏原本圓點，改用邊框呈現 */
+
+            /* 數據輸入區 */
+            .input-group { gap: 5px; font-size: 13pt; }
+            input[type="number"] { 
+                padding: 0; width: 60px; border: none; border-bottom: 1px solid #000; 
+                text-align: center; font-weight: bold; font-size: 13pt;
+            }
+
+            /* 簽名欄 */
+            .signature-area {
+                display: flex; justify-content: space-between;
+                margin-top: 15px; width: 100%; grid-column: 1 / -1;
+                border-top: 2px solid #000; padding-top: 10px;
+            }
+            .sign-box { 
+                width: 45%; border-bottom: 1px solid #000; height: 40px; 
+                font-size: 12pt; line-height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header-section">
+        <div>
+            <h2 style="margin:0;">MIS 營養評估表</h2>
+            <div class="print-score-header">
+                總分: <span id="pScoreDisplay">0</span>  風險: <span id="pRiskDisplay">Low</span>
+            </div>
+        </div>
+        <div class="patient-info">
+            <div>
+                <label>姓名/病歷號:</label>
+                <input type="text" id="patientName" class="input-field" placeholder="輸入...">
+            </div>
+            <div>
+                <label>日期:</label>
+                <input type="date" id="evalDate" class="input-field">
+            </div>
+        </div>
+    </div>
+
+    <form id="misForm">
+        <!-- A. History (Left Column) -->
+        <div class="section-card">
+            <div class="section-title">A. 病史 (History)</div>
+            
+            <div class="question-block">
+                <label class="question-label">1. 乾體重變化 (3-6個月)</label>
+                <div class="options-grid">
+                    <label class="radio-label"><input type="radio" name="q1" value="0" checked><span>0: 無變化</span></label>
+                    <label class="radio-label"><input type="radio" name="q1" value="1"><span>1: 輕微</span></label>
+                    <label class="radio-label"><input type="radio" name="q1" value="2"><span>2: 中度</span></label>
+                    <label class="radio-label"><input type="radio" name="q1" value="3"><span>3: 嚴重</span></label>
+                </div>
+            </div>
+            
+            <div class="question-block">
+                <label class="question-label">2. 飲食攝取</label>
+                <div class="options-grid">
+                    <label class="radio-label"><input type="radio" name="q2" value="0" checked><span>0: 良好</span></label>
+                    <label class="radio-label"><input type="radio" name="q2" value="1"><span>1: 輕微減</span></label>
+                    <label class="radio-label"><input type="radio" name="q2" value="2"><span>2: 中度減</span></label>
+                    <label class="radio-label"><input type="radio" name="q2" value="3"><span>3: 嚴重減</span></label>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <label class="question-label">3. 腸胃道症狀</label>
+                <div class="options-grid">
+                    <label class="radio-label"><input type="radio" name="q3" value="0" checked><span>0: 無</span></label>
+                    <label class="radio-label"><input type="radio" name="q3" value="1"><span>1: 輕微</span></label>
+                    <label class="radio-label"><input type="radio" name="q3" value="2"><span>2: 中度</span></label>
+                    <label class="radio-label"><input type="radio" name="q3" value="3"><span>3: 嚴重</span></label>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <label class="question-label">4. 功能活動力</label>
+                <div class="options-grid">
+                    <label class="radio-label"><input type="radio" name="q4" value="0" checked><span>0: 正常</span></label>
+                    <label class="radio-label"><input type="radio" name="q4" value="1"><span>1: 輕微累</span></label>
+                    <label class="radio-label"><input type="radio" name="q4" value="2"><span>2: 中度</span></label>
+                    <label class="radio-label"><input type="radio" name="q4" value="3"><span>3: 臥床</span></label>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <label class="question-label">5. 共病症</label>
+                <div class="options-grid">
+                    <label class="radio-label"><input type="radio" name="q5" value="0" checked><span>0: 健康</span></label>
+                    <label class="radio-label"><input type="radio" name="q5" value="1"><span>1: 輕微</span></label>
+                    <label class="radio-label"><input type="radio" name="q5" value="2"><span>2: 中度</span></label>
+                    <label class="radio-label"><input type="radio" name="q5" value="3"><span>3: 重度</span></label>
+                </div>
+            </div>
+        </div>
+
+        <!-- B. Physical (Right Column Top) -->
+        <div class="section-card">
+            <div class="section-title">B. 理學檢查 (Physical)</div>
+            <div class="question-block">
+                <label class="question-label">6. 皮下脂肪</label>
+                <div class="options-grid">
+                    <label class="radio-label"><input type="radio" name="q6" value="0" checked><span>0: 正常</span></label>
+                    <label class="radio-label"><input type="radio" name="q6" value="1"><span>1: 輕微</span></label>
+                    <label class="radio-label"><input type="radio" name="q6" value="2"><span>2: 中度</span></label>
+                    <label class="radio-label"><input type="radio" name="q6" value="3"><span>3: 嚴重</span></label>
+                </div>
+            </div>
+            <div class="question-block">
+                <label class="question-label">7. 肌肉耗損</label>
+                <div class="options-grid">
+                    <label class="radio-label"><input type="radio" name="q7" value="0" checked><span>0: 正常</span></label>
+                    <label class="radio-label"><input type="radio" name="q7" value="1"><span>1: 輕微</span></label>
+                    <label class="radio-label"><input type="radio" name="q7" value="2"><span>2: 中度</span></label>
+                    <label class="radio-label"><input type="radio" name="q7" value="3"><span>3: 嚴重</span></label>
+                </div>
+            </div>
+        </div>
+
+        <!-- C & D (Right Column Bottom) -->
+        <div class="section-card">
+            <div class="section-title">C & D. 數據 (Labs)</div>
+            
+            <div class="question-block">
+                <label class="question-label">8. BMI (kg/m²)</label>
+                <div class="input-group">
+                    <input type="number" id="bmiInput" step="0.1" value="24">
+                    <span id="bmiScoreBadge" class="auto-score-badge">0分</span>
+                </div>
+                <div class="helper-text">>20 (0), 18-20 (1), 16-18 (2), &lt;16 (3)</div>
+            </div>
+
+            <div class="question-block">
+                <label class="question-label">9. Albumin (g/dL)</label>
+                <div class="input-group">
+                    <input type="number" id="albInput" step="0.1" value="4.0">
+                    <span id="albScoreBadge" class="auto-score-badge">0分</span>
+                </div>
+                <div class="helper-text">≥4.0 (0), 3.5-3.9 (1), 3.0-3.4 (2), &lt;3.0 (3)</div>
+            </div>
+
+            <div class="question-block">
+                <label class="question-label">10. TIBC (mg/dL)</label>
+                <div class="input-group">
+                    <input type="number" id="tibcInput" step="1" value="250">
+                    <span id="tibcScoreBadge" class="auto-score-badge">0分</span>
+                </div>
+                <div class="helper-text">≥250 (0), 200-249 (1), 150-199 (2), &lt;150 (3)</div>
+            </div>
+        </div>
+        
+        <!-- 簽名區 -->
+        <div class="signature-area">
+            <div class="sign-box">醫師:</div>
+            <div class="sign-box">營養師/護理師:</div>
+        </div>
+
+    </form>
+
+    <!-- History Table (Hidden in Print) -->
+    <div id="historySection">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0;">📋 儲存紀錄</h3>
+            <button class="btn btn-export" onclick="exportToExcel()">匯出 Excel</button>
+        </div>
+        <div style="overflow-x:auto;">
+            <table id="recordTable">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>姓名</th>
+                        <th>總分</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Bar -->
+<div class="footer-bar">
+    <div style="font-size: 1.1rem; font-weight: bold;">
+        總分: <span id="scoreValue" style="color: #0056b3;">0</span>
+        <span id="riskText" style="font-size:0.9rem; color:#666; margin-left:10px;">Low Risk</span>
+    </div>
+    <div class="btn-group">
+        <button class="btn btn-print" onclick="window.print()">🖨 列印 A4</button>
+        <button class="btn btn-save" onclick="saveRecord()">💾 儲存</button>
+    </div>
+</div>
+
+<script>
+    // --- Init ---
+    document.getElementById('evalDate').valueAsDate = new Date();
+    
+    // --- Logic ---
+    const scores = { q1:0, q2:0, q3:0, q4:0, q5:0, q6:0, q7:0, bmi:0, alb:0, tibc:0 };
+
+    function getRadioVal(name) {
+        const el = document.querySelector(`input[name="${name}"]:checked`);
+        return el ? parseInt(el.value) : 0;
     }
 
-    window.onload = loadData;
-  </script>
-</body>
-</html></p>
+    function calcScore() {
+        // A & B
+        for(let i=1; i<=7; i++) scores[`q${i}`] = getRadioVal(`q${i}`);
+        
+        // C & D
+        const bmi = parseFloat(document.getElementById('bmiInput').value) || 0;
+        scores.bmi = (bmi>=20)?0 : (bmi>=18)?1 : (bmi>=16)?2 : 3;
+        document.getElementById('bmiScoreBadge').innerText = `${scores.bmi}分`;
+
+        const alb = parseFloat(document.getElementById('albInput').value) || 0;
+        scores.alb = (alb>=4.0)?0 : (alb>=3.5)?1 : (alb>=3.0)?2 : 3;
+        document.getElementById('albScoreBadge').innerText = `${scores.alb}分`;
+
+        const tibc = parseFloat(document.getElementById('tibcInput').value) || 0;
+        scores.tibc = (tibc>=250)?0 : (tibc>=200)?1 : (tibc>=150)?2 : 3;
+        document.getElementById('tibcScoreBadge').innerText = `${scores.tibc}分`;
+
+        // Total
+        const total = Object.values(scores).reduce((a,b)=>a+b,0);
+        
+        // UI
+        document.getElementById('scoreValue').innerText = total;
+        document.getElementById('pScoreDisplay').innerText = total;
+        
+        let risk = "Low";
+        if(total >= 6) risk = "Moderate";
+        if(total >= 10) risk = "Severe";
+        
+        document.getElementById('riskText').innerText = risk + " Risk";
+        document.getElementById('pRiskDisplay').innerText = risk;
+
+        return total;
+    }
+
+    // Events
+    document.getElementById('misForm').addEventListener('change', calcScore);
+    document.querySelectorAll('input[type="number"]').forEach(i => i.addEventListener('input', calcScore));
+    calcScore();
+
+    // --- Storage ---
+    const STORAGE_KEY = 'mis_records_v2';
+
+    function saveRecord() {
+        const name = document.getElementById('patientName').value;
+        const date = document.getElementById('evalDate').value;
+        if(!name) { alert('請輸入病患姓名'); return; }
+        
+        const total = calcScore();
+        const record = {
+            id: Date.now(),
+            name: name,
+            date: date,
+            total: total,
+            details: {...scores}
+        };
+
+        let records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        records.unshift(record);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        renderTable();
+        alert('✅ 已儲存');
+    }
+
+    function deleteRecord(id) {
+        if(!confirm('刪除此紀錄？')) return;
+        let records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        records = records.filter(r => r.id !== id);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        renderTable();
+    }
+
+    function renderTable() {
+        const records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const tbody = document.querySelector('#recordTable tbody');
+        tbody.innerHTML = '';
+
+        records.forEach(r => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${r.date}</td>
+                <td>${r.name}</td>
+                <td><strong>${r.total}</strong></td>
+                <td><button class="btn-del" onclick="deleteRecord(${r.id})">刪</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function exportToExcel() {
+        const records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        if(records.length === 0) { alert('無資料'); return; }
+        let csv = "\uFEFFDate,Name,Total,Risk,Q1,Q2,Q3,Q4,Q5,Q6,Q7,BMI,Alb,TIBC\n";
+        records.forEach(r => {
+            let risk = r.total >= 10 ? "Severe" : r.total >= 6 ? "Moderate" : "Low";
+            csv += `${r.date},${r.name},${r.total},${risk},${r.details.q1},${r.details.q2},${r.details.q3},${r.details.q4},${r.details.q5},${r.details.q6},${r.details.q7},${r.details.bmi},${r.details.alb},${r.details.tibc}\n`;
+        });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
+        link.download = "MIS_Data.csv";
+        link.click();
+    }
+    renderTable();
+</script>
+
 </body>
 </html>
